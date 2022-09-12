@@ -1,0 +1,73 @@
+namespace hello {
+  // defines PI's symbol into the hello namespace
+  expose let PI: Float = 3.14f
+
+  expose fn add (a: Int, b: Int): Int {
+    a + b
+  }
+
+  // Function overload
+  expose fn fib {
+     (number: Int): Int {
+       fib(number, 1, 0)
+     }
+     (number: Int, prev: Int, current: Int): Int {
+       if (index <= 0) {
+         current
+       } else {
+         fib(index - 1, prev + current, prev)
+       }
+     }
+  }
+
+  expose type Optional<T> implements Equals {
+    // Type constructors
+    Empty
+    Of(T value)
+
+    fn == (otherRef: Ref): Bool {
+      otherRef
+        .extract(Optional<T>)
+        .map((other-value) { value == other-value })
+        .or-else(true)
+    }
+
+    fn empty? (): Bool {
+       this.map<Bool>((_) { false }).or-else(true)
+    }
+
+    fn map<S> (mapper: (T) {S}): Optional<S> {
+      match this {
+        (Optional.Empty) {
+          Optional.Empty()
+        }
+        (Of value) {
+          Optional.Of(mapper(value))
+        }
+      }
+    }
+
+    fn or-else (default: T): Optional<S> {
+      match this {
+        (Optional.Empty) {
+          detault
+        }
+        (Of value) {
+          value
+        }
+      }
+    }
+  }
+
+  expose class Person {
+    public name: String
+    public age: Int
+    public address: Optional<String> = Optional.Empty()
+
+    birthday(): Person {
+      this.with(age=this.age+1)
+    }
+  }
+
+  expose let maniero = Person(name="Maniero", age=28)
+}
