@@ -34,7 +34,7 @@
 (fun = <T> (Equals<T> first Equals<T> seccond)
   (Equals.eq first seccond))
 
-;; Simple type that
+;; Simple type that can be used to represent an operation result that can be either a success or an error.
 (type Result<S E> (Ok<S> Error<E>))
 
 ;; Classes
