@@ -4,92 +4,136 @@
 (def Float pi 3.14f)
 
 ;; Functions
-(defun add (Int a Int b)
+(fun add (Int a Int b) Int
   (+ a b))
 
-(defun main ()
+;; every function can be curryed
+(def inc (add 1))  ;; (inc 1) => 2
+(def dec (add -1)) ;; (dec 1) => 0
+
+(fun main () IO
   (IO.puts "Hello, World!"))
 
-(defun fib
-  (Int number) Int
-  (fib number 1 0)
-
-  (Int number Int prev Int current) Int
+;; This will not be exported in the namespace
+(fun private recursive-fib
+  (Int prev Int current Int Number) Int
   (if (<= number 0)
     current
-    (tailrec (dec number) (+ prev current) prev)))
+    ;; tailcall does not uses stack so it can be invoked forever (no stack overflows and less memory consumption)
+    (tailcall recursive-fib (+ prev current) prev (dec number))))
+
+(def fib (recursive-fib 1 0))
 
 ;; Protocols are like interfaces, but types does not need to explicitly implement them
 ;; Once the method exists in the type it will be accepted
-(defprotocol Equals<T>
-  (defmethod eq (T T) Boolean))
+(protocol Equals<T>
+  (method eq (T T) Boolean))
 
 ;; Example of the equals function that expected two parameters with the same type that must
 ;; implement the equals protocol
-(defun = <T> (Equals<T> first Equals<T> seccond)
+(fun = <T> (Equals<T> first Equals<T> seccond)
   (Equals.eq first seccond))
+
+;; Simple type that
+(type Result<S E> (Ok<S> Error<E>))
 
 ;; Classes
 (class Person
-  (attributes
-    (public  String  :name)
-    (public  Int     :age)
-    (private Boolean :can-drink?)
-    (private Boolean :virgin?))
+  (attribute String  :name)
+  (attribute Int     :age)
 
-  ;; Private arguments must have a default value since it can be passed as argument
-  (defaults :virgin?    true
-            :can-drink? false)
+  ;; private attributes always requires a default value
+  ;; once it will not be available under constructors
+  (attribute private Boolean :can-drink? true)
+  (attribute private Boolean :virgin?    false)
 
-  ;; Init is like an object constructor. After an instance is made, this method is called
-  (init (this.update-can-drink?))
+  ;; After an instance is baked, this method is called and can make tranformations
+  ;; In this case the init method is private with means it cannot be initialized except when
+  ;; using a static method
+  ;;
+  ;; Since classes are immutable it does not make sense to constructor to be a
+  ;; common function that receives the class attributes once mars always
+  ;; requires a class to be fulfilled in memory. So a constructor only can transform the instance
+  ;; by returning a new one.
+  (private construct (this.update-can-drink?))
 
-  (private defmethod is-of-age? () Boolean
+  ;; Static factory can be used to validate attributes before to make the class
+  (static method make-person (String name Int age) Result<Person, String>
+     (if (> age 0)
+       (Ok (Person :name name
+                   :age age))
+       (Error "This person was not born yet")))
+
+  (method private is-of-age? () Boolean
      (>= (:age this) 18))
 
-  (private defmethod update-can-drink? () Boolean
+  ;; Every class has these two private method that can be used to return a copy of the class
+  ;; (.with) recieves the attribute you wanna change and its new value, returna a new instance
+  ;; (.update) receives the attribute you wanna change and a function that receives the current value and returns a new one
+  (method private update-can-drink? () Boolean
      (this.with :can-drink? (this.is-of-age?)))
 
-  (defmethod rename (String name) Person
+  (method public rename (String name) Person
     (this.with :name name))
 
-  (defmethod make-birthday () Person
+  ;; All instance method are only syntax sugar to its static version
+  ;; it means that `(this.update :age inc)` is the same as `(Person.update this :age inc)`
+  (method public make-birthday () Person
+    ;; this is just like clojure's thread first
     (-> this
-        (Person.update :age (partial + 1))
+        (Person.update :age inc)
         (Person.update-can-drink?)))
 
 (def person
-  (Person
-    :name "Maniero"
-    :age  28))
+  (Person.make-person "Maniero" 28))
 
-(deftype Maybe <T> (None Just<T>)
-  (defmethod or-else (T default) T
+;; Once mars has no null, a Maybe type is provided to represent the absence of data
+;; it forces the programmer to always check for data absence
+(type Maybe <T> (None (Just T))
+  (method or-else (T default) T
     (match this
-      (None)       default
+      None         default
       (Just value) value))
 
-  (defmethod map <S> (Lambda<(T) S> mapper) Maybe<T>
+  (method map <S> (Lambda<(T) S> mapper) Maybe<T>
     (match this
-      (None)       (None)
+      None         None
       (Just value) (Just (mapper value))))
 
-  (defmethod none? () Boolean
+  (method none? () Boolean
     (-> (this.map (lambda (_) false))
         (Maube.or-else true))))
 
-
-(defun compare-maybe <T> (Maybe<Equals<T> first Maybe<Equals<T>> second) Boolean
+(fun compare-maybe <T> (Maybe<Equals<T> first Maybe<Equals<T>> second) Boolean
   (match first
-    (None)       (second.none?)
+    None         (second.none?)
     (Just value) (-> second
-                     (Maybe.map (lambda (second-value) (= value second-value)))
+                     (Maybe.map ((second-value) (= value second-value)))
                      (Maybe.or-else false))))
 
-(= (Just (Integer 2))
-   (Maybe.map inc (Just (Integer 1))))
+(type CounterMessage (Inc Dec (GetCurrent <Producer<Int>>)))
+
+(class Counter
+  (attribute public Int :number 0)
+
+  (method private on-inc () counter
+    (this.update :number inc))
+
+  (method private on-dec () counter
+    (this.update :number dec)))
+
+;; All Multable variables are slow once they are thread-safe
+(def counter (Multex (Counter)))
+
+;; returns the current value
+(count.get)
+
+;; swapping
+;; It can be executed multple times. So it must be side-effect free
+(count.swap (lambda (counter) (counter.inc)))
 
 (comment
   "how to use Maybe map"
-  (Maybe.map
-   (Maybe.map (Just 1) inc)))
+  (-> (Just 1)
+      (Maybe.map inc)
+      (compare-maybe (Just 2)))) ;; ==> true
