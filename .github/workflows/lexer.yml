@@ -9,8 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: boost
-      run: sudo apt-get update && sudo apt-get install -yq libboost1.65-dev
     - name: test
       working-directory: ./libs/mclexer
       run: sh test.sh
