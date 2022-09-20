@@ -1,4 +1,4 @@
-name: mclexer - build and run tests
+name: build and run tests
 on:
   push:
     branches: [ main ]
@@ -10,5 +10,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: test
-      working-directory: ./libs/mclexer
       run: sh test.sh

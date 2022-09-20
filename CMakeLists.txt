@@ -8,6 +8,13 @@ project(${MARS_PROJECT_NAME})
 # GoogleTest requires at least C++14
 set(CMAKE_CXX_STANDARD 14)
 
+set(MARS_LIBRARIES_DIR
+    libs
+)
+set(MARS_LIBRARIES
+    mclexer
+)
+
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -37,3 +44,9 @@ target_link_libraries(
 
 include(GoogleTest)
 gtest_discover_tests(hello_test)
+
+foreach(LIBRARY ${MARS_LIBRARIES})
+    add_subdirectory("${MARS_LIBRARIES_DIR}/${LIBRARY}")
+endforeach(LIBRARY)
+
+# target_link_libraries(${MARS_PROJECT_NAME} ${MARS_LIBRARIES})

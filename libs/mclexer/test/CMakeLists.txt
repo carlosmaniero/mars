@@ -32,6 +32,7 @@ target_link_libraries(
   lexer_test
   GTest::gtest_main
   ${LIBRARY_NAME}
+  ${MARS_LIBRARIES}
 )
 
 include(GoogleTest)
