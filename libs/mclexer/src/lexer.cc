@@ -7,19 +7,6 @@ using namespace lexer;
 TokenLocation::TokenLocation(int line, int column) : line { line }, column { column }
 {}
 
-bool TokenLocation::operator==(const TokenLocation &token) const
-{
-    return this->line == (&token)->line
-        && this->column == (&token)->column;
-}
-
-bool Token::operator==(const Token &token) const
-{
-    return this->kind == (&token)->kind
-        && this->location == (&token)->location
-        && this->value == (&token)->value;
-}
-
 Token::Token(TokenLocation location, TokenKind kind, std::string value) :
     location { location }, kind { kind }, value { value }
 {}

@@ -22,7 +22,6 @@ namespace lexer
       int column;
 
       TokenLocation(int line, int column);
-      bool operator==(const TokenLocation &token) const;
   };
 
   class Token
@@ -33,7 +32,6 @@ namespace lexer
       std::string value;
 
       Token(TokenLocation location, TokenKind kind, std::string value);
-      bool operator==(const Token &token) const;
   };
 
   class Lexer
