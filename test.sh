@@ -23,4 +23,4 @@ logStep "Building..."
 cmake --build build
 
 logStep "Running lexer tests"
-cd build/libs/mclexer/test && ctest && cd -
+cd build/libs/mclexer/test && ctest --output-on-failure && cd -
