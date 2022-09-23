@@ -11,13 +11,15 @@ void compare_tokens (Token token1, Token token2) {
 }
 
 TEST(LexerTest, ReturnsAnEmptyListGivenAnEmptyInput) {
-    Lexer my_lexer("");
+    std::string source = "";
+    Lexer my_lexer(&source);
 
     EXPECT_EQ(my_lexer.tokenize().size(), 0);
 }
 
 TEST(LexerTest, ParsesOpenAndCloseStatement) {
-    Lexer my_lexer("(\n )");
+    std::string source = "(\n )";
+    Lexer my_lexer(&source);
 
     TokenLocation start_location(1, 1);
     TokenLocation end_location(2, 2);

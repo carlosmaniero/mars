@@ -34,14 +34,39 @@ namespace lexer
       Token(TokenLocation location, TokenKind kind, std::string value);
   };
 
+  class TokenFactory {
+    public:
+      virtual Token* makeToken(std::string* value, TokenLocation tokenLocation);
+  };
+
+  class StatementStartTokenFactory : public TokenFactory {
+    public:
+      Token* makeToken(std::string* value, TokenLocation tokenLocation);
+  };
+
+  class StatementEndTokenFactory : public TokenFactory {
+    public:
+      Token* makeToken(std::string* value, TokenLocation tokenLocation);
+  };
+
   class Lexer
   {
     public:
-      std::string source;
-
-      Lexer(std::string source);
+      std::string* source;
       std::vector<Token> tokenize();
 
+      Lexer(std::string* source);
+    private:
+      std::vector<TokenFactory*> tokenFactories;
+
+      int column;
+      int line;
+
+      void reset();
+      void nextLine();
+      void nextColumn();
+
+      Token* makeNextToken(std::string* identifier);
   };
 }
 
