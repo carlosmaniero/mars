@@ -1,9 +1,10 @@
 // Copyright 2022 Maniero
 
 #include "mclexer/lexer.h"
+#include "mclexer/token.h"
 #include <gtest/gtest.h>
 
-void compare_tokens(mclexer::Token token1, mclexer::Token token2) {
+void compare_tokens(mctoken::Token token1, mctoken::Token token2) {
     EXPECT_EQ(token1.value, token2.value);
     EXPECT_EQ(token1.kind, token2.kind);
     EXPECT_EQ(token1.location.line, token2.location.line);
@@ -21,13 +22,13 @@ TEST(LexerTest, ParsesOpenAndCloseStatement) {
     std::string source = "(\n )";
     mclexer::Lexer my_lexer(&source);
 
-    mclexer::TokenLocation start_location(1, 1);
-    mclexer::TokenLocation end_location(2, 2);
+    mctoken::TokenLocation start_location(1, 1);
+    mctoken::TokenLocation end_location(2, 2);
 
-    mclexer::Token start_token(start_location, mclexer::token_statement_start, "(");
-    mclexer::Token end_token(end_location, mclexer::token_statement_end, ")");
+    mctoken::Token start_token(start_location, mctoken::token_statement_start, "(");
+    mctoken::Token end_token(end_location, mctoken::token_statement_end, ")");
 
-    std::vector<mclexer::Token> tokens = my_lexer.tokenize();
+    std::vector<mctoken::Token> tokens = my_lexer.tokenize();
 
     EXPECT_EQ(tokens.size(), 2);
 
@@ -39,15 +40,15 @@ TEST(LexerTest, ParsesAIdentifier) {
     std::string source = "(hello)";
     mclexer::Lexer my_lexer(&source);
 
-    mclexer::TokenLocation start_location(1, 1);
-    mclexer::TokenLocation identifier_location(1, 2);
-    mclexer::TokenLocation end_location(1, 7);
+    mctoken::TokenLocation start_location(1, 1);
+    mctoken::TokenLocation identifier_location(1, 2);
+    mctoken::TokenLocation end_location(1, 7);
 
-    mclexer::Token start_token(start_location, mclexer::token_statement_start, "(");
-    mclexer::Token identifier_token(identifier_location, mclexer::token_identifier, "hello");
-    mclexer::Token end_token(end_location, mclexer::token_statement_end, ")");
+    mctoken::Token start_token(start_location, mctoken::token_statement_start, "(");
+    mctoken::Token identifier_token(identifier_location, mctoken::token_identifier, "hello");
+    mctoken::Token end_token(end_location, mctoken::token_statement_end, ")");
 
-    std::vector<mclexer::Token> tokens = my_lexer.tokenize();
+    std::vector<mctoken::Token> tokens = my_lexer.tokenize();
 
     EXPECT_EQ(tokens.size(), 3);
 
@@ -60,21 +61,21 @@ TEST(LexerTest, ParsesMultipleIdentifiers) {
     std::string source = "(a\n b c)";
     mclexer::Lexer my_lexer(&source);
 
-    mclexer::TokenLocation start_location(1, 1);
-    mclexer::TokenLocation first_identifier_location(1, 2);
-    mclexer::TokenLocation second_identifier_location(2, 2);
-    mclexer::TokenLocation third_identifier_location(2, 4);
-    mclexer::TokenLocation end_location(2, 5);
+    mctoken::TokenLocation start_location(1, 1);
+    mctoken::TokenLocation first_identifier_location(1, 2);
+    mctoken::TokenLocation second_identifier_location(2, 2);
+    mctoken::TokenLocation third_identifier_location(2, 4);
+    mctoken::TokenLocation end_location(2, 5);
 
-    mclexer::Token start_token(start_location, mclexer::token_statement_start, "(");
+    mctoken::Token start_token(start_location, mctoken::token_statement_start, "(");
 
-    mclexer::Token first_identifier_token(first_identifier_location, mclexer::token_identifier, "a");
-    mclexer::Token second_identifier_token(second_identifier_location, mclexer::token_identifier, "b");
-    mclexer::Token third_identifier_token(third_identifier_location, mclexer::token_identifier, "c");
+    mctoken::Token first_identifier_token(first_identifier_location, mctoken::token_identifier, "a");
+    mctoken::Token second_identifier_token(second_identifier_location, mctoken::token_identifier, "b");
+    mctoken::Token third_identifier_token(third_identifier_location, mctoken::token_identifier, "c");
 
-    mclexer::Token end_token(end_location, mclexer::token_statement_end, ")");
+    mctoken::Token end_token(end_location, mctoken::token_statement_end, ")");
 
-    std::vector<mclexer::Token> tokens = my_lexer.tokenize();
+    std::vector<mctoken::Token> tokens = my_lexer.tokenize();
 
     EXPECT_EQ(tokens.size(), 5);
 

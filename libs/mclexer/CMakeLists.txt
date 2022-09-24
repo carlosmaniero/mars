@@ -10,12 +10,14 @@ set(LIBRARY_HEADERS_DIR
     include/${LIBRARY_NAME}
 )
 set(LIBRARY_HEADERS
+    ${LIBRARY_HEADERS_DIR}/token.h
     ${LIBRARY_HEADERS_DIR}/lexer.h
 )
 set(LIBRARY_SOURCE_DIR
     src
 )
 set(LIBRARY_SOURCE
+    ${LIBRARY_SOURCE_DIR}/token.cc
     ${LIBRARY_SOURCE_DIR}/lexer.cc
 )
 

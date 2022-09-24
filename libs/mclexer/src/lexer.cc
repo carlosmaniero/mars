@@ -1,27 +1,23 @@
 // Copyright 2022 Maniero
 
+#include "mclexer/token.h"
 #include "mclexer/lexer.h"
 #include <iostream>
 
-mclexer::TokenLocation::TokenLocation(int line, int column) : line { line }, column { column } {}
-
-mclexer::Token::Token(TokenLocation location, TokenKind kind, std::string value) :
-    location { location }, kind { kind }, value { value } {}
-
-mclexer::Token* mclexer::SingleCharTokenFactory::makeToken(char* value, TokenLocation tokenLocation) {
+mctoken::Token* mclexer::SingleCharTokenFactory::makeToken(char* value, mctoken::TokenLocation tokenLocation) {
     return NULL;
 }
 
-mclexer::Token* mclexer::StatementStartTokenFactory::makeToken(char* value, TokenLocation tokenLocation) {
+mctoken::Token* mclexer::StatementStartTokenFactory::makeToken(char* value, mctoken::TokenLocation tokenLocation) {
     if (*value == '(') {
-        return new Token(tokenLocation, token_statement_start, "(");
+        return new mctoken::Token(tokenLocation, mctoken::token_statement_start, "(");
     }
     return NULL;
 }
 
-mclexer::Token* mclexer::StatementEndTokenFactory::makeToken(char* value, TokenLocation tokenLocation) {
+mctoken::Token* mclexer::StatementEndTokenFactory::makeToken(char* value, mctoken::TokenLocation tokenLocation) {
     if (*value == ')') {
-        return new Token(tokenLocation, token_statement_end, ")");
+        return new mctoken::Token(tokenLocation, mctoken::token_statement_end, ")");
     }
     return NULL;
 }
@@ -52,15 +48,15 @@ void mclexer::Lexer::reset() {
 void mclexer::Lexer::makeTokenWithWordIsPresent() {
     if (!currentWord.empty()) {
         int tokenColumn = column - currentWord.length();
-        Token token(TokenLocation(line, tokenColumn), token_identifier, currentWord);
+        mctoken::Token token(mctoken::TokenLocation(line, tokenColumn), mctoken::token_identifier, currentWord);
         tokens.push_back(token);
     }
     currentWord = "";
 }
 
-mclexer::Token* mclexer::Lexer::nextTokenFromCurrentChar(char* currentChar) {
+mctoken::Token* mclexer::Lexer::nextTokenFromCurrentChar(char* currentChar) {
     for (SingleCharTokenFactory *factory : this->singleCharTokenFactories) {
-        Token* singleCharToken = (*factory).makeToken(&*currentChar, TokenLocation(line, column));
+        mctoken::Token* singleCharToken = (*factory).makeToken(&*currentChar, mctoken::TokenLocation(line, column));
 
         if (singleCharToken != NULL) {
             return singleCharToken;
@@ -69,7 +65,7 @@ mclexer::Token* mclexer::Lexer::nextTokenFromCurrentChar(char* currentChar) {
     return NULL;
 }
 
-std::vector<mclexer::Token> mclexer::Lexer::tokenize() {
+std::vector<mctoken::Token> mclexer::Lexer::tokenize() {
     reset();
 
     std::string:: iterator currentCharIterator;
@@ -79,7 +75,7 @@ std::vector<mclexer::Token> mclexer::Lexer::tokenize() {
          currentCharIterator++) {
         nextColumn();
 
-        Token* singleCharToken = this->nextTokenFromCurrentChar(&*currentCharIterator);
+        mctoken::Token* singleCharToken = this->nextTokenFromCurrentChar(&*currentCharIterator);
 
         if (singleCharToken != NULL) {
             this->makeTokenWithWordIsPresent();
