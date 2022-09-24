@@ -1,3 +1,5 @@
+// Copyright 2022 Maniero
+
 #ifndef LIBS_MCLEXER_INCLUDE_MCLEXER_LEXER_H_
 #define LIBS_MCLEXER_INCLUDE_MCLEXER_LEXER_H_
 #include <string>
