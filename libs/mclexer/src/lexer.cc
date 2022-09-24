@@ -1,8 +1,8 @@
 // Copyright 2022 Maniero
 
+#include <iostream>
 #include "mclexer/token.h"
 #include "mclexer/lexer.h"
-#include <iostream>
 
 mctoken::Token* mclexer::SingleCharTokenFactory::makeToken(char* value, mctoken::TokenLocation tokenLocation) {
     return NULL;

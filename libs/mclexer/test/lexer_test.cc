@@ -1,8 +1,8 @@
 // Copyright 2022 Maniero
 
+#include <gtest/gtest.h>
 #include "mclexer/lexer.h"
 #include "mclexer/token.h"
-#include <gtest/gtest.h>
 
 void compare_tokens(mctoken::Token token1, mctoken::Token token2) {
     EXPECT_EQ(token1.value, token2.value);
