@@ -11,6 +11,7 @@ set(LIBRARY_HEADERS_DIR
 )
 set(LIBRARY_HEADERS
     ${LIBRARY_HEADERS_DIR}/token.h
+    ${LIBRARY_HEADERS_DIR}/token_factory.h
     ${LIBRARY_HEADERS_DIR}/lexer.h
 )
 set(LIBRARY_SOURCE_DIR
@@ -18,6 +19,7 @@ set(LIBRARY_SOURCE_DIR
 )
 set(LIBRARY_SOURCE
     ${LIBRARY_SOURCE_DIR}/token.cc
+    ${LIBRARY_SOURCE_DIR}/token_factory.cc
     ${LIBRARY_SOURCE_DIR}/lexer.cc
 )
 

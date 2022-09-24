@@ -6,23 +6,9 @@
 #include <vector>
 
 #include "mclexer/token.h"
+#include "mclexer/token_factory.h"
 
 namespace mclexer {
-class SingleCharTokenFactory {
- public:
-    virtual mctoken::Token* makeToken(char* value, mctoken::TokenLocation tokenLocation);
-};
-
-class StatementStartTokenFactory : public SingleCharTokenFactory {
- public:
-    mctoken::Token* makeToken(char* value, mctoken::TokenLocation tokenLocation);
-};
-
-class StatementEndTokenFactory : public SingleCharTokenFactory {
- public:
-    mctoken::Token* makeToken(char* value, mctoken::TokenLocation tokenLocation);
-};
-
 class Lexer {
  public:
     std::string* source;
@@ -30,7 +16,7 @@ class Lexer {
 
     explicit Lexer(std::string* source);
  private:
-    std::vector<SingleCharTokenFactory*> singleCharTokenFactories;
+    std::vector<mctokenfactory::SingleCharTokenFactory*> singleCharTokenFactories;
     std::string currentWord;
     std::vector<mctoken::Token> tokens;
 
