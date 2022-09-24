@@ -3,7 +3,7 @@
 #ifndef LIBS_MCLEXER_INCLUDE_MCLEXER_TOKEN_FACTORY_H_
 #define LIBS_MCLEXER_INCLUDE_MCLEXER_TOKEN_FACTORY_H_
 
-#define DEF_MAKE_TOKEN(ARG_CLS) mctoken::Token* mctokenfactory::ARG_CLS::makeToken
+#define DEF_MAKE_TOKEN(ARG_CLS) bool mctokenfactory::ARG_CLS::makeToken
 
 #include <vector>
 #include <string>
@@ -13,33 +13,33 @@ namespace mctokenfactory {
 class ISingleCharTokenFactory {
  public:
     static std::vector<ISingleCharTokenFactory*> factories;
-    virtual mctoken::Token* makeToken(char* value, mctoken::TokenLocation tokenLocation);
+    virtual bool makeToken(mctoken::Token* token, char* value, mctoken::TokenLocation tokenLocation);
 };
 
 class StatementStartTokenFactory : public ISingleCharTokenFactory {
  public:
-    mctoken::Token* makeToken(char* value, mctoken::TokenLocation tokenLocation);
+    bool makeToken(mctoken::Token* token, char* value, mctoken::TokenLocation tokenLocation);
 };
 
 class StatementEndTokenFactory : public ISingleCharTokenFactory {
  public:
-    mctoken::Token* makeToken(char* value, mctoken::TokenLocation tokenLocation);
+    bool makeToken(mctoken::Token* token, char* value, mctoken::TokenLocation tokenLocation);
 };
 
 class IWordTokenFactory {
  public:
     static std::vector<IWordTokenFactory*> factories;
-    virtual mctoken::Token* makeToken(std::string* value, mctoken::TokenLocation tokenLocation);
+    virtual bool makeToken(mctoken::Token* token, std::string* value, mctoken::TokenLocation tokenLocation);
 };
 
 class KeywordTokenFactory : public IWordTokenFactory {
  public:
-    mctoken::Token* makeToken(std::string* value, mctoken::TokenLocation tokenLocation);
+    bool makeToken(mctoken::Token* token, std::string* value, mctoken::TokenLocation tokenLocation);
 };
 
 class IdentifierTokenFactory : public IWordTokenFactory {
  public:
-    mctoken::Token* makeToken(std::string* value, mctoken::TokenLocation tokenLocation);
+    bool makeToken(mctoken::Token* token, std::string* value, mctoken::TokenLocation tokenLocation);
 };
 }  // namespace mctokenfactory
 

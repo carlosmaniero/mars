@@ -22,31 +22,28 @@ void mclexer::Lexer::reset() {
     currentWord = "";
 }
 
-void mclexer::Lexer::makeTokenWithWordIsPresent() {
+bool mclexer::Lexer::makeTokenWithWordIsPresent(mctoken::Token* token) {
     if (!currentWord.empty()) {
         int tokenColumn = column - currentWord.length();
 
         for (auto factory : mctokenfactory::IWordTokenFactory::factories) {
-            auto token = factory->makeToken(&currentWord, mctoken::TokenLocation(line, tokenColumn));
-
-            if (token != NULL) {
-                tokens.push_back(*token);
-                break;
+            if (factory->makeToken(token, &currentWord, mctoken::TokenLocation(line, tokenColumn))) {
+                currentWord = "";
+                return true;
             }
         }
     }
-    currentWord = "";
+
+    return false;
 }
 
-mctoken::Token* mclexer::Lexer::nextTokenFromCurrentChar(char* currentChar) {
-    for (auto *factory : mctokenfactory::ISingleCharTokenFactory::factories) {
-        mctoken::Token* singleCharToken = (*factory).makeToken(&*currentChar, mctoken::TokenLocation(line, column));
-
-        if (singleCharToken != NULL) {
-            return singleCharToken;
+bool mclexer::Lexer::nextTokenFromCurrentChar(mctoken::Token* token, char* currentChar) {
+    for (auto factory : mctokenfactory::ISingleCharTokenFactory::factories) {
+        if (factory->makeToken(token, &*currentChar, mctoken::TokenLocation(line, column))) {
+            return true;
         }
     }
-    return NULL;
+    return false;
 }
 
 std::vector<mctoken::Token> mclexer::Lexer::tokenize() {
@@ -59,23 +56,30 @@ std::vector<mctoken::Token> mclexer::Lexer::tokenize() {
          currentCharIterator++) {
         nextColumn();
 
-        mctoken::Token* singleCharToken = this->nextTokenFromCurrentChar(&*currentCharIterator);
+        mctoken::Token wordToken;
+        mctoken::Token singleCharToken;
 
-        if (singleCharToken != NULL) {
-            this->makeTokenWithWordIsPresent();
-            tokens.push_back(*singleCharToken);
+        if (this->nextTokenFromCurrentChar(&singleCharToken, &*currentCharIterator)) {
+            if (this->makeTokenWithWordIsPresent(&wordToken)) {
+                tokens.push_back(wordToken);
+            }
+            tokens.push_back(singleCharToken);
 
             continue;
         }
 
         if (*currentCharIterator == '\n') {
-            this->makeTokenWithWordIsPresent();
+            if (this->makeTokenWithWordIsPresent(&wordToken)) {
+                tokens.push_back(wordToken);
+            }
             nextLine();
             continue;
         }
 
         if (*currentCharIterator == ' ') {
-            this->makeTokenWithWordIsPresent();
+            if (this->makeTokenWithWordIsPresent(&wordToken)) {
+                tokens.push_back(wordToken);
+            }
             continue;
         }
 

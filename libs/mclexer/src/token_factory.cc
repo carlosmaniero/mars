@@ -2,22 +2,28 @@
 
 #include "mclexer/token_factory.h"
 
-DEF_MAKE_TOKEN(ISingleCharTokenFactory)(char* value, mctoken::TokenLocation tokenLocation) {
-    return NULL;
+DEF_MAKE_TOKEN(ISingleCharTokenFactory)(mctoken::Token* token, char* value, mctoken::TokenLocation tokenLocation) {
+    return false;
 }
 
-DEF_MAKE_TOKEN(StatementStartTokenFactory)(char* value, mctoken::TokenLocation tokenLocation) {
+DEF_MAKE_TOKEN(StatementStartTokenFactory)(mctoken::Token* token, char* value, mctoken::TokenLocation tokenLocation) {
     if (*value == '(') {
-        return new mctoken::Token(tokenLocation, mctoken::token_statement_start, "(");
+        token->kind = mctoken::token_statement_start;
+        token->value = "(";
+        token->location = tokenLocation;
+        return true;
     }
-    return NULL;
+    return false;
 }
 
-DEF_MAKE_TOKEN(StatementEndTokenFactory)(char* value, mctoken::TokenLocation tokenLocation) {
+DEF_MAKE_TOKEN(StatementEndTokenFactory)(mctoken::Token* token, char* value, mctoken::TokenLocation tokenLocation) {
     if (*value == ')') {
-        return new mctoken::Token(tokenLocation, mctoken::token_statement_end, ")");
+        token->kind = mctoken::token_statement_end;
+        token->value = ")";
+        token->location = tokenLocation;
+        return true;
     }
-    return NULL;
+    return false;
 }
 
 std::vector<mctokenfactory::ISingleCharTokenFactory*> mctokenfactory::ISingleCharTokenFactory::factories = {
@@ -25,21 +31,27 @@ std::vector<mctokenfactory::ISingleCharTokenFactory*> mctokenfactory::ISingleCha
   new StatementEndTokenFactory(),
 };
 
-DEF_MAKE_TOKEN(IWordTokenFactory)(std::string* word, mctoken::TokenLocation tokenLocation) {
-    return NULL;
+DEF_MAKE_TOKEN(IWordTokenFactory)(mctoken::Token* token, std::string* word, mctoken::TokenLocation tokenLocation) {
+    return false;
 }
 
-DEF_MAKE_TOKEN(KeywordTokenFactory)(std::string* word, mctoken::TokenLocation tokenLocation) {
-    for(auto keyword : mctoken::keywords) {
+DEF_MAKE_TOKEN(KeywordTokenFactory)(mctoken::Token* token, std::string* word, mctoken::TokenLocation tokenLocation) {
+    for (auto keyword : mctoken::keywords) {
         if (*word == keyword) {
-            return new mctoken::Token(tokenLocation, mctoken::token_keyword, *word);
+            token->kind = mctoken::token_keyword;
+            token->value = *word;
+            token->location = tokenLocation;
+            return true;
         }
     }
-    return NULL;
+    return false;
 }
 
-DEF_MAKE_TOKEN(IdentifierTokenFactory)(std::string* word, mctoken::TokenLocation tokenLocation) {
-    return new mctoken::Token(tokenLocation, mctoken::token_identifier, *word);
+DEF_MAKE_TOKEN(IdentifierTokenFactory)(mctoken::Token* token, std::string* word, mctoken::TokenLocation tokenLocation) {
+    token->kind = mctoken::token_identifier;
+    token->value = *word;
+    token->location = tokenLocation;
+    return true;
 }
 
 std::vector<mctokenfactory::IWordTokenFactory*> mctokenfactory::IWordTokenFactory::factories = {

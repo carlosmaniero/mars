@@ -26,8 +26,8 @@ class Lexer {
     void nextLine();
     void nextColumn();
 
-    mctoken::Token* nextTokenFromCurrentChar(char* currentChar);
-    void makeTokenWithWordIsPresent();
+    bool nextTokenFromCurrentChar(mctoken::Token* token, char* currentChar);
+    bool makeTokenWithWordIsPresent(mctoken::Token* token);
 };
 }  // namespace mclexer
 

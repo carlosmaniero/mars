@@ -15,12 +15,13 @@ TEST(KeywordTokenFactory, ReturnsATokenForAllTheSymbols) {
     std::string source = "";
 
     mctokenfactory::KeywordTokenFactory keywordFactory;
+    mctoken::Token token;
 
     for (auto symbol : mctoken::keywords) {
-        EXPECT_TRUE(keywordFactory.makeToken(&symbol, mctoken::TokenLocation(1, 1)) != NULL);
+        EXPECT_TRUE(keywordFactory.makeToken(&token, &symbol, mctoken::TokenLocation(1, 1)));
     }
 
     std::string notAKeyword = "loló";
 
-    EXPECT_TRUE(keywordFactory.makeToken(&notAKeyword, mctoken::TokenLocation(1, 1)) == NULL);
+    EXPECT_FALSE(keywordFactory.makeToken(&token, &notAKeyword, mctoken::TokenLocation(1, 1)));
 }
