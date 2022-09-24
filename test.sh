@@ -16,11 +16,13 @@ logStep () {
     printLine
 }
 
-logStep "Generating build files..."
-cmake -S . -B build
+if [ "$1" != "--skip-build" ]; then
+    logStep "Generating build files..."
+    cmake -S . -B build
 
-logStep "Building..."
-cmake --build build
+    logStep "Building..."
+    cmake --build build
+fi
 
 logStep "Running lexer tests"
 cd build/libs/mclexer/test && ctest --output-on-failure && cd -

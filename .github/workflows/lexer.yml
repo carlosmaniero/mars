@@ -9,5 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: test
-      run: sh test.sh
+    - name: building 🏗️
+      run: sh setup.sh
+    - name: testing 🧪
+      run: sh test.sh --skip-build
+    - name: linting 💅
+      run: sh lint.sh
