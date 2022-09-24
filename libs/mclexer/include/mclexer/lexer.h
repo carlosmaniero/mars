@@ -16,7 +16,6 @@ class Lexer {
 
     explicit Lexer(std::string* source);
  private:
-    std::vector<mctokenfactory::ISingleCharTokenFactory*> singleCharTokenFactories;
     std::string currentWord;
     std::vector<mctoken::Token> tokens;
 

@@ -20,6 +20,11 @@ DEF_MAKE_TOKEN(StatementEndTokenFactory)(char* value, mctoken::TokenLocation tok
     return NULL;
 }
 
+std::vector<mctokenfactory::ISingleCharTokenFactory*> mctokenfactory::ISingleCharTokenFactory::factories = {
+  new StatementStartTokenFactory(),
+  new StatementEndTokenFactory(),
+};
+
 DEF_MAKE_TOKEN(IWordTokenFactory)(std::string* word, mctoken::TokenLocation tokenLocation) {
     return NULL;
 }

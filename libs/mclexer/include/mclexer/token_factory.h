@@ -5,12 +5,14 @@
 
 #define DEF_MAKE_TOKEN(ARG_CLS) mctoken::Token* mctokenfactory::ARG_CLS::makeToken
 
+#include <vector>
 #include <string>
 #include "mclexer/token.h"
 
 namespace mctokenfactory {
 class ISingleCharTokenFactory {
  public:
+    static std::vector<ISingleCharTokenFactory*> factories;
     virtual mctoken::Token* makeToken(char* value, mctoken::TokenLocation tokenLocation);
 };
 

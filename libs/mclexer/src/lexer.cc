@@ -4,12 +4,7 @@
 #include "mclexer/token.h"
 #include "mclexer/lexer.h"
 
-mclexer::Lexer::Lexer(std::string* source) : source { source } {
-    this->singleCharTokenFactories = {
-      new mctokenfactory::StatementStartTokenFactory(),
-      new mctokenfactory::StatementEndTokenFactory()
-    };
-}
+mclexer::Lexer::Lexer(std::string* source) : source { source } {}
 
 void mclexer::Lexer::nextLine() {
     line++;
@@ -40,7 +35,7 @@ void mclexer::Lexer::makeTokenWithWordIsPresent() {
 }
 
 mctoken::Token* mclexer::Lexer::nextTokenFromCurrentChar(char* currentChar) {
-    for (auto *factory : this->singleCharTokenFactories) {
+    for (auto *factory : mctokenfactory::ISingleCharTokenFactory::factories) {
         mctoken::Token* singleCharToken = (*factory).makeToken(&*currentChar, mctoken::TokenLocation(line, column));
 
         if (singleCharToken != NULL) {
