@@ -34,9 +34,12 @@ class Token {
     TokenLocation location;
     TokenKind kind;
     std::string value;
+    bool found;
 
     Token();
     Token(TokenLocation location, TokenKind kind, std::string value);
+
+    void update(TokenLocation location, TokenKind kind, std::string value);
 };
 }  // namespace mctoken
 
