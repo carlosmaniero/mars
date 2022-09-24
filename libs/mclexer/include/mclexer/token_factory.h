@@ -28,7 +28,13 @@ class StatementEndTokenFactory : public ISingleCharTokenFactory {
 
 class IWordTokenFactory {
  public:
+    static std::vector<IWordTokenFactory*> factories;
     virtual mctoken::Token* makeToken(std::string* value, mctoken::TokenLocation tokenLocation);
+};
+
+class KeywordTokenFactory : public IWordTokenFactory {
+ public:
+    mctoken::Token* makeToken(std::string* value, mctoken::TokenLocation tokenLocation);
 };
 
 class IdentifierTokenFactory : public IWordTokenFactory {

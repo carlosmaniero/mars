@@ -29,6 +29,18 @@ DEF_MAKE_TOKEN(IWordTokenFactory)(std::string* word, mctoken::TokenLocation toke
     return NULL;
 }
 
+DEF_MAKE_TOKEN(KeywordTokenFactory)(std::string* word, mctoken::TokenLocation tokenLocation) {
+    if (*word == "fun") {
+        return new mctoken::Token(tokenLocation, mctoken::token_keyword, *word);
+    }
+    return NULL;
+}
+
 DEF_MAKE_TOKEN(IdentifierTokenFactory)(std::string* word, mctoken::TokenLocation tokenLocation) {
     return new mctoken::Token(tokenLocation, mctoken::token_identifier, *word);
 }
+
+std::vector<mctokenfactory::IWordTokenFactory*> mctokenfactory::IWordTokenFactory::factories = {
+  new KeywordTokenFactory,
+  new IdentifierTokenFactory
+};

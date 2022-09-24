@@ -26,10 +26,14 @@ void mclexer::Lexer::makeTokenWithWordIsPresent() {
     if (!currentWord.empty()) {
         int tokenColumn = column - currentWord.length();
 
-        auto identifierTokenFactory = new mctokenfactory::IdentifierTokenFactory();
-        auto token = identifierTokenFactory->makeToken(&currentWord, mctoken::TokenLocation(line, tokenColumn));
+        for (auto factory : mctokenfactory::IWordTokenFactory::factories) {
+            auto token = factory->makeToken(&currentWord, mctoken::TokenLocation(line, tokenColumn));
 
-        tokens.push_back(*token);
+            if (token != NULL) {
+                tokens.push_back(*token);
+                break;
+            }
+        }
     }
     currentWord = "";
 }

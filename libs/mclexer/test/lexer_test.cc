@@ -85,3 +85,30 @@ TEST(LexerTest, ParsesMultipleIdentifiers) {
     compare_tokens(tokens.at(3), third_identifier_token);
     compare_tokens(tokens.at(4), end_token);
 }
+
+
+TEST(LexerTest, ParsesFunctionSymbol) {
+    std::string source = "(fun a)";
+    mclexer::Lexer my_lexer(&source);
+
+    mctoken::TokenLocation start_location(1, 1);
+    mctoken::TokenLocation function_location(1, 2);
+    mctoken::TokenLocation identifier_location(1, 6);
+    mctoken::TokenLocation end_location(1, 7);
+
+    mctoken::Token start_token(start_location, mctoken::token_statement_start, "(");
+
+    mctoken::Token function_token(function_location, mctoken::token_keyword, "fun");
+    mctoken::Token identifier_token(identifier_location, mctoken::token_identifier, "a");
+
+    mctoken::Token end_token(end_location, mctoken::token_statement_end, ")");
+
+    std::vector<mctoken::Token> tokens = my_lexer.tokenize();
+
+    EXPECT_EQ(tokens.size(), 4);
+
+    compare_tokens(tokens.at(0), start_token);
+    compare_tokens(tokens.at(1), function_token);
+    compare_tokens(tokens.at(2), identifier_token);
+    compare_tokens(tokens.at(3), end_token);
+}
