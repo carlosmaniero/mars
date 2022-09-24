@@ -28,8 +28,20 @@ add_executable(
   lexer_test.cc
 )
 
+add_executable(
+  token_factory_test
+  token_factory_test.cc
+)
+
 target_link_libraries(
   lexer_test
+  GTest::gtest_main
+  ${LIBRARY_NAME}
+  ${MARS_LIBRARIES}
+)
+
+target_link_libraries(
+  token_factory_test
   GTest::gtest_main
   ${LIBRARY_NAME}
   ${MARS_LIBRARIES}
@@ -38,3 +50,4 @@ target_link_libraries(
 include(GoogleTest)
 
 gtest_discover_tests(lexer_test)
+gtest_discover_tests(token_factory_test)

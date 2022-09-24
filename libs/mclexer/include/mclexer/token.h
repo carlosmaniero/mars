@@ -5,6 +5,13 @@
 #include <string>
 
 namespace mctoken {
+static std::string const keywords[] = { // NOLINT
+  "fun",
+  "method",
+  "class",
+  "type"
+};
+
 enum TokenKind {
   token_eof,
   token_statement_start,

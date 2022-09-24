@@ -30,8 +30,10 @@ DEF_MAKE_TOKEN(IWordTokenFactory)(std::string* word, mctoken::TokenLocation toke
 }
 
 DEF_MAKE_TOKEN(KeywordTokenFactory)(std::string* word, mctoken::TokenLocation tokenLocation) {
-    if (*word == "fun") {
-        return new mctoken::Token(tokenLocation, mctoken::token_keyword, *word);
+    for(auto keyword : mctoken::keywords) {
+        if (*word == keyword) {
+            return new mctoken::Token(tokenLocation, mctoken::token_keyword, *word);
+        }
     }
     return NULL;
 }
