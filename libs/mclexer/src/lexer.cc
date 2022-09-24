@@ -1,5 +1,6 @@
 #include "mclexer/lexer.h"
 #include <iostream>
+
 using namespace std;
 
 using namespace lexer;
@@ -11,22 +12,22 @@ Token::Token(TokenLocation location, TokenKind kind, std::string value) :
     location { location }, kind { kind }, value { value }
 {}
 
-Token* TokenFactory::makeToken(std::string* value, TokenLocation tokenLocation)
+Token* SingleCharTokenFactory::makeToken(char* value, TokenLocation tokenLocation)
 {
     return NULL;
 }
 
-Token* StatementStartTokenFactory::makeToken(std::string* value, TokenLocation tokenLocation)
+Token* StatementStartTokenFactory::makeToken(char* value, TokenLocation tokenLocation)
 {
-    if (*value == "(") {
+    if (*value == '(') {
         return new Token(tokenLocation, token_statement_start, "(");
     }
     return NULL;
 }
 
-Token* StatementEndTokenFactory::makeToken(std::string* value, TokenLocation tokenLocation)
+Token* StatementEndTokenFactory::makeToken(char* value, TokenLocation tokenLocation)
 {
-    if (*value == ")") {
+    if (*value == ')') {
         return new Token(tokenLocation, token_statement_end, ")");
     }
     return NULL;
@@ -34,7 +35,7 @@ Token* StatementEndTokenFactory::makeToken(std::string* value, TokenLocation tok
 
 Lexer::Lexer(std::string* source) : source { source }
 {
-    this->tokenFactories = {
+    this->singleCharTokenFactories = {
       new StatementStartTokenFactory(),
       new StatementEndTokenFactory()
     };
@@ -55,16 +56,29 @@ void Lexer::reset()
 {
     line = 1;
     column = 0;
+    tokens = {};
+    currentWord = "";
 }
 
-Token* Lexer::makeNextToken(std::string* identifier)
+void Lexer::makeTokenWithWordIsPresent()
 {
-    for (TokenFactory *factory : this->tokenFactories)
+    if (!currentWord.empty())
     {
-        Token* token = (*factory).makeToken(identifier, TokenLocation(line, column));
+        Token token(TokenLocation(line, column - currentWord.length()), token_identifier, currentWord);
+        tokens.push_back(token);
+    }
+    currentWord = "";
+}
 
-        if (token != NULL) {
-            return token;
+Token* Lexer::nextTokenFromCurrentChar(char* currentChar)
+{
+    for (SingleCharTokenFactory *factory : this->singleCharTokenFactories)
+    {
+        Token* singleCharToken = (*factory).makeToken(&*currentChar, TokenLocation(line, column));
+
+        if (singleCharToken != NULL)
+        {
+            return singleCharToken;
         }
     }
     return NULL;
@@ -74,38 +88,37 @@ std::vector<Token> Lexer::tokenize()
 {
     reset();
 
-    std::vector<Token> tokens;
-    std::string identifier = "";
     std::string:: iterator currentCharIterator;
 
     for (currentCharIterator = (*source).begin(); currentCharIterator != (*source).end(); currentCharIterator++)
     {
         nextColumn();
 
+        Token* singleCharToken = this->nextTokenFromCurrentChar(&*currentCharIterator);
+
+        if (singleCharToken != NULL)
+        {
+            this->makeTokenWithWordIsPresent();
+            tokens.push_back(*singleCharToken);
+
+            continue;
+        }
+
         if (*currentCharIterator == '\n')
         {
-            identifier = "";
+            this->makeTokenWithWordIsPresent();
             nextLine();
             continue;
         }
 
         if (*currentCharIterator == ' ')
         {
-            identifier = "";
+            this->makeTokenWithWordIsPresent();
             continue;
         }
 
 
-        identifier.push_back(*currentCharIterator);
-
-        Token* token = makeNextToken(&identifier);
-
-        if (token != NULL) {
-            tokens.push_back(*token);
-            identifier = "";
-            continue;
-        }
-
+        currentWord.push_back(*currentCharIterator);
     }
 
     return tokens;

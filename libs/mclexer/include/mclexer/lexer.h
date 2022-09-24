@@ -34,19 +34,19 @@ namespace lexer
       Token(TokenLocation location, TokenKind kind, std::string value);
   };
 
-  class TokenFactory {
+  class SingleCharTokenFactory {
     public:
-      virtual Token* makeToken(std::string* value, TokenLocation tokenLocation);
+      virtual Token* makeToken(char* value, TokenLocation tokenLocation);
   };
 
-  class StatementStartTokenFactory : public TokenFactory {
+  class StatementStartTokenFactory : public SingleCharTokenFactory {
     public:
-      Token* makeToken(std::string* value, TokenLocation tokenLocation);
+      Token* makeToken(char* value, TokenLocation tokenLocation);
   };
 
-  class StatementEndTokenFactory : public TokenFactory {
+  class StatementEndTokenFactory : public SingleCharTokenFactory {
     public:
-      Token* makeToken(std::string* value, TokenLocation tokenLocation);
+      Token* makeToken(char* value, TokenLocation tokenLocation);
   };
 
   class Lexer
@@ -57,7 +57,9 @@ namespace lexer
 
       Lexer(std::string* source);
     private:
-      std::vector<TokenFactory*> tokenFactories;
+      std::vector<SingleCharTokenFactory*> singleCharTokenFactories;
+      std::string currentWord;
+      std::vector<Token> tokens;
 
       int column;
       int line;
@@ -66,7 +68,8 @@ namespace lexer
       void nextLine();
       void nextColumn();
 
-      Token* makeNextToken(std::string* identifier);
+      Token* nextTokenFromCurrentChar(char* currentChar);
+      void makeTokenWithWordIsPresent();
   };
 }
 
