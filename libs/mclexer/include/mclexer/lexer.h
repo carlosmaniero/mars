@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace lexer {
+namespace mclexer {
 enum TokenKind {
   token_eof,
   token_statement_start,
@@ -68,6 +68,6 @@ class Lexer {
     Token* nextTokenFromCurrentChar(char* currentChar);
     void makeTokenWithWordIsPresent();
 };
-}  // namespace lexer
+}  // namespace mclexer
 
 #endif  // LIBS_MCLEXER_INCLUDE_MCLEXER_LEXER_H_
