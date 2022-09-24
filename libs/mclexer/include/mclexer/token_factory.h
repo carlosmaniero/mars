@@ -5,22 +5,33 @@
 
 #define DEF_MAKE_TOKEN(ARG_CLS) mctoken::Token* mctokenfactory::ARG_CLS::makeToken
 
+#include <string>
 #include "mclexer/token.h"
 
 namespace mctokenfactory {
-class SingleCharTokenFactory {
+class ISingleCharTokenFactory {
  public:
     virtual mctoken::Token* makeToken(char* value, mctoken::TokenLocation tokenLocation);
 };
 
-class StatementStartTokenFactory : public SingleCharTokenFactory {
+class StatementStartTokenFactory : public ISingleCharTokenFactory {
  public:
     mctoken::Token* makeToken(char* value, mctoken::TokenLocation tokenLocation);
 };
 
-class StatementEndTokenFactory : public SingleCharTokenFactory {
+class StatementEndTokenFactory : public ISingleCharTokenFactory {
  public:
     mctoken::Token* makeToken(char* value, mctoken::TokenLocation tokenLocation);
+};
+
+class IWordTokenFactory {
+ public:
+    virtual mctoken::Token* makeToken(std::string* value, mctoken::TokenLocation tokenLocation);
+};
+
+class IdentifierTokenFactory : public IWordTokenFactory {
+ public:
+    mctoken::Token* makeToken(std::string* value, mctoken::TokenLocation tokenLocation);
 };
 }  // namespace mctokenfactory
 

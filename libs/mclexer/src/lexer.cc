@@ -30,8 +30,11 @@ void mclexer::Lexer::reset() {
 void mclexer::Lexer::makeTokenWithWordIsPresent() {
     if (!currentWord.empty()) {
         int tokenColumn = column - currentWord.length();
-        mctoken::Token token(mctoken::TokenLocation(line, tokenColumn), mctoken::token_identifier, currentWord);
-        tokens.push_back(token);
+
+        auto identifierTokenFactory = new mctokenfactory::IdentifierTokenFactory();
+        auto token = identifierTokenFactory->makeToken(&currentWord, mctoken::TokenLocation(line, tokenColumn));
+
+        tokens.push_back(*token);
     }
     currentWord = "";
 }

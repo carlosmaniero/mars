@@ -2,7 +2,7 @@
 
 #include "mclexer/token_factory.h"
 
-DEF_MAKE_TOKEN(SingleCharTokenFactory)(char* value, mctoken::TokenLocation tokenLocation) {
+DEF_MAKE_TOKEN(ISingleCharTokenFactory)(char* value, mctoken::TokenLocation tokenLocation) {
     return NULL;
 }
 
@@ -18,4 +18,12 @@ DEF_MAKE_TOKEN(StatementEndTokenFactory)(char* value, mctoken::TokenLocation tok
         return new mctoken::Token(tokenLocation, mctoken::token_statement_end, ")");
     }
     return NULL;
+}
+
+DEF_MAKE_TOKEN(IWordTokenFactory)(std::string* word, mctoken::TokenLocation tokenLocation) {
+    return NULL;
+}
+
+DEF_MAKE_TOKEN(IdentifierTokenFactory)(std::string* word, mctoken::TokenLocation tokenLocation) {
+    return new mctoken::Token(tokenLocation, mctoken::token_identifier, *word);
 }
