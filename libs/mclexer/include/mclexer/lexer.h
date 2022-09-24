@@ -12,12 +12,11 @@ namespace mclexer {
 class Lexer {
  public:
     std::string* source;
-    std::vector<mctoken::Token> tokenize();
+    void tokenize(std::vector<mctoken::Token>* tokens);
 
     explicit Lexer(std::string* source);
  private:
     std::string currentWord;
-    std::vector<mctoken::Token> tokens;
 
     int column;
     int line;
@@ -26,8 +25,8 @@ class Lexer {
     void nextLine();
     void nextColumn();
 
-    void nextTokenFromCurrentChar(mctoken::Token* token, char* currentChar);
-    void nextTokenWhenWordIsPresent(mctoken::Token* token);
+    bool pushTokenFromCurrentChar(std::vector<mctoken::Token>* tokens, char* currentChar);
+    void pushTokenWhenWordIsPresent(std::vector<mctoken::Token>* tokens);
 };
 }  // namespace mclexer
 

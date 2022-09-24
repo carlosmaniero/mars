@@ -14,8 +14,11 @@ void compare_tokens(mctoken::Token token1, mctoken::Token token2) {
 TEST(LexerTest, ReturnsAnEmptyListGivenAnEmptyInput) {
     std::string source = "";
     mclexer::Lexer my_lexer(&source);
+    std::vector<mctoken::Token> tokens;
 
-    EXPECT_EQ(my_lexer.tokenize().size(), 0);
+    my_lexer.tokenize(&tokens);
+
+    EXPECT_EQ(tokens.size(), 0);
 }
 
 TEST(LexerTest, ParsesOpenAndCloseStatement) {
@@ -28,7 +31,8 @@ TEST(LexerTest, ParsesOpenAndCloseStatement) {
     mctoken::Token start_token(start_location, mctoken::token_statement_start, "(");
     mctoken::Token end_token(end_location, mctoken::token_statement_end, ")");
 
-    std::vector<mctoken::Token> tokens = my_lexer.tokenize();
+    std::vector<mctoken::Token> tokens;
+    my_lexer.tokenize(&tokens);
 
     EXPECT_EQ(tokens.size(), 2);
 
@@ -48,7 +52,8 @@ TEST(LexerTest, ParsesAIdentifier) {
     mctoken::Token identifier_token(identifier_location, mctoken::token_identifier, "hello");
     mctoken::Token end_token(end_location, mctoken::token_statement_end, ")");
 
-    std::vector<mctoken::Token> tokens = my_lexer.tokenize();
+    std::vector<mctoken::Token> tokens;
+    my_lexer.tokenize(&tokens);
 
     EXPECT_EQ(tokens.size(), 3);
 
@@ -75,7 +80,8 @@ TEST(LexerTest, ParsesMultipleIdentifiers) {
 
     mctoken::Token end_token(end_location, mctoken::token_statement_end, ")");
 
-    std::vector<mctoken::Token> tokens = my_lexer.tokenize();
+    std::vector<mctoken::Token> tokens;
+    my_lexer.tokenize(&tokens);
 
     EXPECT_EQ(tokens.size(), 5);
 
@@ -103,7 +109,8 @@ TEST(LexerTest, ParsesFunctionSymbol) {
 
     mctoken::Token end_token(end_location, mctoken::token_statement_end, ")");
 
-    std::vector<mctoken::Token> tokens = my_lexer.tokenize();
+    std::vector<mctoken::Token> tokens;
+    my_lexer.tokenize(&tokens);
 
     EXPECT_EQ(tokens.size(), 4);
 

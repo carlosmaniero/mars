@@ -18,18 +18,19 @@ void mclexer::Lexer::nextColumn() {
 void mclexer::Lexer::reset() {
     line = 1;
     column = 0;
-    tokens = {};
     currentWord = "";
 }
 
-void mclexer::Lexer::nextTokenWhenWordIsPresent(mctoken::Token* token) {
+void mclexer::Lexer::pushTokenWhenWordIsPresent(std::vector<mctoken::Token>* tokens) {
     if (!currentWord.empty()) {
         int tokenColumn = column - currentWord.length();
+        mctoken::Token token;
 
         for (auto factory : mctokenfactory::IWordTokenFactory::factories) {
-            factory->matchToken(token, &currentWord, mctoken::TokenLocation(line, tokenColumn));
+            factory->matchToken(&token, &currentWord, mctoken::TokenLocation(line, tokenColumn));
 
-            if (token->found) {
+            if (token.found) {
+                tokens->push_back(token);
                 currentWord = "";
                 return;
             }
@@ -37,17 +38,23 @@ void mclexer::Lexer::nextTokenWhenWordIsPresent(mctoken::Token* token) {
     }
 }
 
-void mclexer::Lexer::nextTokenFromCurrentChar(mctoken::Token* token, char* currentChar) {
+bool mclexer::Lexer::pushTokenFromCurrentChar(std::vector<mctoken::Token>* tokens, char* currentChar) {
+    mctoken::Token token;
     for (auto factory : mctokenfactory::ISingleCharTokenFactory::factories) {
-        factory->matchToken(token, &*currentChar, mctoken::TokenLocation(line, column));
+        factory->matchToken(&token, &*currentChar, mctoken::TokenLocation(line, column));
 
-        if (token->found) {
-           return;
+        if (token.found) {
+           this->pushTokenWhenWordIsPresent(tokens);
+           tokens->push_back(token);
+
+           return true;
         }
     }
+
+    return false;
 }
 
-std::vector<mctoken::Token> mclexer::Lexer::tokenize() {
+void mclexer::Lexer::tokenize(std::vector<mctoken::Token>* tokens) {
     reset();
 
     std::string:: iterator currentCharIterator;
@@ -55,47 +62,22 @@ std::vector<mctoken::Token> mclexer::Lexer::tokenize() {
     for (currentCharIterator = (*source).begin(); currentCharIterator != (*source).end(); currentCharIterator++) {
         nextColumn();
 
-        mctoken::Token wordToken;
-        mctoken::Token singleCharToken;
-
-        this->nextTokenFromCurrentChar(&singleCharToken, &*currentCharIterator);
-
-        if (singleCharToken.found) {
-            this->nextTokenWhenWordIsPresent(&wordToken);
-
-            if (wordToken.found) {
-                tokens.push_back(wordToken);
-            }
-
-            tokens.push_back(singleCharToken);
-
+        if (this->pushTokenFromCurrentChar(tokens, &*currentCharIterator)) {
             continue;
         }
 
         if (*currentCharIterator == '\n') {
-            this->nextTokenWhenWordIsPresent(&wordToken);
-
-            if (wordToken.found) {
-                tokens.push_back(wordToken);
-            }
-
+            this->pushTokenWhenWordIsPresent(tokens);
             nextLine();
             continue;
         }
 
         if (*currentCharIterator == ' ') {
-            this->nextTokenWhenWordIsPresent(&wordToken);
-
-            if (wordToken.found) {
-                tokens.push_back(wordToken);
-            }
-
+            this->pushTokenWhenWordIsPresent(tokens);
             continue;
         }
 
 
         currentWord.push_back(*currentCharIterator);
     }
-
-    return tokens;
 }
