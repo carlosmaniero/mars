@@ -26,3 +26,4 @@ fi
 
 logStep "Running lexer tests"
 cd build/libs/mclexer/test && ctest --output-on-failure && cd -
+cd build/libs/mcparser/test && ctest --output-on-failure && cd -
