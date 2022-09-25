@@ -21,13 +21,13 @@ void mclexer::Lexer::reset() {
     currentWord = "";
 }
 
-void mclexer::Lexer::pushTokenWhenWordIsPresent(std::vector<mctoken::Token>* tokens) {
+void mclexer::Lexer::pushTokenWhenWordIsPresent(std::vector<mclexer::Token>* tokens) {
     if (!currentWord.empty()) {
         int tokenColumn = column - currentWord.length();
-        mctoken::Token token;
+        mclexer::Token token;
 
-        for (auto factory : mctokenfactory::IWordTokenFactory::factories) {
-            factory->matchToken(&token, &currentWord, mctoken::TokenLocation(line, tokenColumn));
+        for (auto factory : mclexer::IWordTokenFactory::factories) {
+            factory->matchToken(&token, &currentWord, mclexer::TokenLocation(line, tokenColumn));
 
             if (token.found) {
                 tokens->push_back(token);
@@ -38,11 +38,11 @@ void mclexer::Lexer::pushTokenWhenWordIsPresent(std::vector<mctoken::Token>* tok
     }
 }
 
-bool mclexer::Lexer::pushTokenFromCurrentChar(std::vector<mctoken::Token>* tokens, char* currentChar) {
-    mctoken::Token token;
+bool mclexer::Lexer::pushTokenFromCurrentChar(std::vector<mclexer::Token>* tokens, char* currentChar) {
+    mclexer::Token token;
 
-    for (auto factory : mctokenfactory::ISingleCharTokenFactory::factories) {
-        factory->matchToken(&token, &*currentChar, mctoken::TokenLocation(line, column));
+    for (auto factory : mclexer::ISingleCharTokenFactory::factories) {
+        factory->matchToken(&token, &*currentChar, mclexer::TokenLocation(line, column));
 
         if (token.found) {
            this->pushTokenWhenWordIsPresent(tokens);
@@ -55,8 +55,8 @@ bool mclexer::Lexer::pushTokenFromCurrentChar(std::vector<mctoken::Token>* token
     return false;
 }
 
-std::unique_ptr<std::vector<mctoken::Token>> mclexer::Lexer::tokenize() {
-    auto tokens = std::make_unique<std::vector<mctoken::Token>>();
+std::unique_ptr<std::vector<mclexer::Token>> mclexer::Lexer::tokenize() {
+    auto tokens = std::make_unique<std::vector<mclexer::Token>>();
 
     reset();
 
@@ -80,9 +80,9 @@ std::unique_ptr<std::vector<mctoken::Token>> mclexer::Lexer::tokenize() {
             continue;
         }
 
-
         currentWord.push_back(*currentCharIterator);
     }
+
     this->pushTokenWhenWordIsPresent(tokens.get());
     return std::move(tokens);
 }

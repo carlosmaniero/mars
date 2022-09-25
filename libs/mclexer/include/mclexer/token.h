@@ -4,7 +4,7 @@
 #define LIBS_MCLEXER_INCLUDE_MCLEXER_TOKEN_H_
 #include <string>
 
-namespace mctoken {
+namespace mclexer {
 static std::string const keywords[] = { // NOLINT
   "fun",
   "method",
@@ -41,7 +41,7 @@ class Token {
 
     void fulfill(TokenLocation location, TokenKind kind, std::string value);
 };
-}  // namespace mctoken
+}  // namespace mclexer
 
 
 #endif  // LIBS_MCLEXER_INCLUDE_MCLEXER_TOKEN_H_

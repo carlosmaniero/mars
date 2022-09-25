@@ -13,7 +13,7 @@ namespace mclexer {
 class Lexer {
  public:
     std::string* source;
-    std::unique_ptr<std::vector<mctoken::Token>> tokenize();
+    std::unique_ptr<std::vector<mclexer::Token>> tokenize();
 
     explicit Lexer(std::string* source);
  private:
@@ -26,8 +26,8 @@ class Lexer {
     void nextLine();
     void nextColumn();
 
-    bool pushTokenFromCurrentChar(std::vector<mctoken::Token>* tokens, char* currentChar);
-    void pushTokenWhenWordIsPresent(std::vector<mctoken::Token>* tokens);
+    bool pushTokenFromCurrentChar(std::vector<mclexer::Token>* tokens, char* currentChar);
+    void pushTokenWhenWordIsPresent(std::vector<mclexer::Token>* tokens);
 };
 }  // namespace mclexer
 

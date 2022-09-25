@@ -4,7 +4,7 @@
 #include "mclexer/lexer.h"
 #include "mclexer/token.h"
 
-void compareTokens(mctoken::Token token1, mctoken::Token token2) {
+void compareTokens(mclexer::Token token1, mclexer::Token token2) {
     EXPECT_EQ(token1.found, token2.found);
     EXPECT_EQ(token1.value, token2.value);
     EXPECT_EQ(token1.kind, token2.kind);
@@ -25,11 +25,11 @@ TEST(LexerTest, ParsesOpenAndCloseStatement) {
     std::string source = "(\n )";
     mclexer::Lexer my_lexer(&source);
 
-    mctoken::Token start_token;
-    mctoken::Token end_token;
+    mclexer::Token start_token;
+    mclexer::Token end_token;
 
-    start_token.fulfill(mctoken::TokenLocation(1, 1), mctoken::token_symbol, "(");
-    end_token.fulfill(mctoken::TokenLocation(2, 2), mctoken::token_symbol, ")");
+    start_token.fulfill(mclexer::TokenLocation(1, 1), mclexer::token_symbol, "(");
+    end_token.fulfill(mclexer::TokenLocation(2, 2), mclexer::token_symbol, ")");
 
     auto tokens = my_lexer.tokenize();
 
@@ -43,13 +43,13 @@ TEST(LexerTest, ParsesAIdentifier) {
     std::string source = "(hello)";
     mclexer::Lexer my_lexer(&source);
 
-    mctoken::Token start_token;
-    mctoken::Token identifier_token;
-    mctoken::Token end_token;
+    mclexer::Token start_token;
+    mclexer::Token identifier_token;
+    mclexer::Token end_token;
 
-    start_token.fulfill(mctoken::TokenLocation(1, 1), mctoken::token_symbol, "(");
-    identifier_token.fulfill(mctoken::TokenLocation(1, 2), mctoken::token_identifier, "hello");
-    end_token.fulfill(mctoken::TokenLocation(1, 7), mctoken::token_symbol, ")");
+    start_token.fulfill(mclexer::TokenLocation(1, 1), mclexer::token_symbol, "(");
+    identifier_token.fulfill(mclexer::TokenLocation(1, 2), mclexer::token_identifier, "hello");
+    end_token.fulfill(mclexer::TokenLocation(1, 7), mclexer::token_symbol, ")");
 
     auto tokens = my_lexer.tokenize();
 
@@ -64,17 +64,17 @@ TEST(LexerTest, ParsesMultipleIdentifiers) {
     std::string source = "(a\n b c)";
     mclexer::Lexer my_lexer(&source);
 
-    mctoken::Token start_token;
-    mctoken::Token first_identifier_token;
-    mctoken::Token second_identifier_token;
-    mctoken::Token third_identifier_token;
-    mctoken::Token end_token;
+    mclexer::Token start_token;
+    mclexer::Token first_identifier_token;
+    mclexer::Token second_identifier_token;
+    mclexer::Token third_identifier_token;
+    mclexer::Token end_token;
 
-    start_token.fulfill(mctoken::TokenLocation(1, 1), mctoken::token_symbol, "(");
-    first_identifier_token.fulfill(mctoken::TokenLocation(1, 2), mctoken::token_identifier, "a");
-    second_identifier_token.fulfill(mctoken::TokenLocation(2, 2), mctoken::token_identifier, "b");
-    third_identifier_token.fulfill(mctoken::TokenLocation(2, 4), mctoken::token_identifier, "c");
-    end_token.fulfill(mctoken::TokenLocation(2, 5), mctoken::token_symbol, ")");
+    start_token.fulfill(mclexer::TokenLocation(1, 1), mclexer::token_symbol, "(");
+    first_identifier_token.fulfill(mclexer::TokenLocation(1, 2), mclexer::token_identifier, "a");
+    second_identifier_token.fulfill(mclexer::TokenLocation(2, 2), mclexer::token_identifier, "b");
+    third_identifier_token.fulfill(mclexer::TokenLocation(2, 4), mclexer::token_identifier, "c");
+    end_token.fulfill(mclexer::TokenLocation(2, 5), mclexer::token_symbol, ")");
 
     auto tokens = my_lexer.tokenize();
 
@@ -91,15 +91,15 @@ TEST(LexerTest, ParsesFunctionSymbol) {
     std::string source = "(fun a)";
     mclexer::Lexer my_lexer(&source);
 
-    mctoken::Token start_token;
-    mctoken::Token function_token;
-    mctoken::Token identifier_token;
-    mctoken::Token end_token;
+    mclexer::Token start_token;
+    mclexer::Token function_token;
+    mclexer::Token identifier_token;
+    mclexer::Token end_token;
 
-    start_token.fulfill(mctoken::TokenLocation(1, 1), mctoken::token_symbol, "(");
-    function_token.fulfill(mctoken::TokenLocation(1, 2), mctoken::token_keyword, "fun");
-    identifier_token.fulfill(mctoken::TokenLocation(1, 6), mctoken::token_identifier, "a");
-    end_token.fulfill(mctoken::TokenLocation(1, 7), mctoken::token_symbol, ")");
+    start_token.fulfill(mclexer::TokenLocation(1, 1), mclexer::token_symbol, "(");
+    function_token.fulfill(mclexer::TokenLocation(1, 2), mclexer::token_keyword, "fun");
+    identifier_token.fulfill(mclexer::TokenLocation(1, 6), mclexer::token_identifier, "a");
+    end_token.fulfill(mclexer::TokenLocation(1, 7), mclexer::token_symbol, ")");
 
     auto tokens = my_lexer.tokenize();
 
@@ -115,19 +115,19 @@ TEST(LexerTest, ParsesNumberWhenAnWordStartsWithANumber) {
     std::string source = "13win 13.13 13,45 13";
     mclexer::Lexer my_lexer(&source);
 
-    mctoken::Token firstToken;
-    mctoken::Token secondToken;
-    mctoken::Token thirdToken;
-    mctoken::Token fourthToken;
-    mctoken::Token fifthToken;
+    mclexer::Token firstToken;
+    mclexer::Token secondToken;
+    mclexer::Token thirdToken;
+    mclexer::Token fourthToken;
+    mclexer::Token fifthToken;
 
-    firstToken.fulfill(mctoken::TokenLocation(1, 1), mctoken::token_number, "13win");
-    secondToken.fulfill(mctoken::TokenLocation(1, 7), mctoken::token_number, "13.13");
-    thirdToken.fulfill(mctoken::TokenLocation(1, 13), mctoken::token_number, "13");
-    fourthToken.fulfill(mctoken::TokenLocation(1, 16), mctoken::token_number, "45");
-    fifthToken.fulfill(mctoken::TokenLocation(1, 18), mctoken::token_number, "13");
+    firstToken.fulfill(mclexer::TokenLocation(1, 1), mclexer::token_number, "13win");
+    secondToken.fulfill(mclexer::TokenLocation(1, 7), mclexer::token_number, "13.13");
+    thirdToken.fulfill(mclexer::TokenLocation(1, 13), mclexer::token_number, "13");
+    fourthToken.fulfill(mclexer::TokenLocation(1, 16), mclexer::token_number, "45");
+    fifthToken.fulfill(mclexer::TokenLocation(1, 18), mclexer::token_number, "13");
 
-    std::vector<mctoken::Token> myRefToken;
+    std::vector<mclexer::Token> myRefToken;
     auto tokens = my_lexer.tokenize();
 
     EXPECT_EQ(tokens->size(), 5);

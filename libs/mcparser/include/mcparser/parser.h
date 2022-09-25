@@ -9,11 +9,11 @@
 namespace mcparser {
 class Parser {
  public:
-     explicit Parser(mcparser::ParserContext* context, std::vector<mctoken::Token>* tokens):
+     explicit Parser(mcparser::ParserContext* context, std::vector<mclexer::Token>* tokens):
          parserContext {context}, tokens {tokens} {};
  private:
      mcparser::ParserContext* parserContext;
-     std::vector<mctoken::Token>* tokens;
+     std::vector<mclexer::Token>* tokens;
 };
 }  // namespace mcparser
 #endif  // LIBS_MCPARSER_INCLUDE_MCPARSER_PARSER_H_

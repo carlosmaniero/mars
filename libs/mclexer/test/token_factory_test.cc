@@ -4,7 +4,7 @@
 #include "mclexer/lexer.h"
 #include "mclexer/token.h"
 
-void compareTokens(mctoken::Token token1, mctoken::Token token2) {
+void compareTokens(mclexer::Token token1, mclexer::Token token2) {
     EXPECT_EQ(token1.value, token2.value);
     EXPECT_EQ(token1.kind, token2.kind);
     EXPECT_EQ(token1.location.line, token2.location.line);
@@ -14,19 +14,19 @@ void compareTokens(mctoken::Token token1, mctoken::Token token2) {
 TEST(KeywordTokenFactory, ReturnsATokenForAllTheSymbols) {
     std::string source = "";
 
-    mctokenfactory::KeywordTokenFactory keywordFactory;
+    mclexer::KeywordTokenFactory keywordFactory;
 
-    for (auto symbol : mctoken::keywords) {
-        mctoken::Token token;
-        keywordFactory.matchToken(&token, &symbol, mctoken::TokenLocation(1, 1));
+    for (auto symbol : mclexer::keywords) {
+        mclexer::Token token;
+        keywordFactory.matchToken(&token, &symbol, mclexer::TokenLocation(1, 1));
 
         EXPECT_TRUE(token.found);
     }
 
     std::string notAKeyword = "loló";
 
-    mctoken::Token token;
-    keywordFactory.matchToken(&token, &notAKeyword, mctoken::TokenLocation(1, 1));
+    mclexer::Token token;
+    keywordFactory.matchToken(&token, &notAKeyword, mclexer::TokenLocation(1, 1));
 
     EXPECT_FALSE(token.found);
 }
