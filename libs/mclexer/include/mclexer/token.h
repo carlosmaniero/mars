@@ -18,6 +18,7 @@ enum TokenKind {
   token_statement_end,
   token_string,
   token_keyword,
+  token_number,
   token_identifier
 };
 

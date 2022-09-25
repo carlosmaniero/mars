@@ -40,6 +40,7 @@ void mclexer::Lexer::pushTokenWhenWordIsPresent(std::vector<mctoken::Token>* tok
 
 bool mclexer::Lexer::pushTokenFromCurrentChar(std::vector<mctoken::Token>* tokens, char* currentChar) {
     mctoken::Token token;
+
     for (auto factory : mctokenfactory::ISingleCharTokenFactory::factories) {
         factory->matchToken(&token, &*currentChar, mctoken::TokenLocation(line, column));
 
@@ -72,7 +73,7 @@ void mclexer::Lexer::tokenize(std::vector<mctoken::Token>* tokens) {
             continue;
         }
 
-        if (*currentCharIterator == ' ') {
+        if (*currentCharIterator == ' ' || *currentCharIterator == ',') {
             this->pushTokenWhenWordIsPresent(tokens);
             continue;
         }
@@ -80,4 +81,5 @@ void mclexer::Lexer::tokenize(std::vector<mctoken::Token>* tokens) {
 
         currentWord.push_back(*currentCharIterator);
     }
+    this->pushTokenWhenWordIsPresent(tokens);
 }

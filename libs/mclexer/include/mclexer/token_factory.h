@@ -32,6 +32,11 @@ class IWordTokenFactory {
     virtual void matchToken(mctoken::Token* token, std::string* value, mctoken::TokenLocation tokenLocation);
 };
 
+class NumberTokenFactory : public IWordTokenFactory {
+ public:
+    void matchToken(mctoken::Token* token, std::string* value, mctoken::TokenLocation tokenLocation);
+};
+
 class KeywordTokenFactory : public IWordTokenFactory {
  public:
     void matchToken(mctoken::Token* token, std::string* value, mctoken::TokenLocation tokenLocation);

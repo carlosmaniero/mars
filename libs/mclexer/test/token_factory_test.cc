@@ -4,7 +4,7 @@
 #include "mclexer/lexer.h"
 #include "mclexer/token.h"
 
-void compare_tokens(mctoken::Token token1, mctoken::Token token2) {
+void compareTokens(mctoken::Token token1, mctoken::Token token2) {
     EXPECT_EQ(token1.value, token2.value);
     EXPECT_EQ(token1.kind, token2.kind);
     EXPECT_EQ(token1.location.line, token2.location.line);
