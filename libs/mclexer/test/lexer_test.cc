@@ -26,11 +26,11 @@ TEST(LexerTest, ParsesOpenAndCloseStatement) {
     std::string source = "(\n )";
     mclexer::Lexer my_lexer(&source);
 
-    mctoken::TokenLocation start_location(1, 1);
-    mctoken::TokenLocation end_location(2, 2);
+    mctoken::Token start_token;
+    mctoken::Token end_token;
 
-    mctoken::Token start_token(start_location, mctoken::token_statement_start, "(");
-    mctoken::Token end_token(end_location, mctoken::token_statement_end, ")");
+    start_token.fulfill(mctoken::TokenLocation(1, 1), mctoken::token_symbol, "(");
+    end_token.fulfill(mctoken::TokenLocation(2, 2), mctoken::token_symbol, ")");
 
     std::vector<mctoken::Token> tokens;
     my_lexer.tokenize(&tokens);
@@ -45,13 +45,13 @@ TEST(LexerTest, ParsesAIdentifier) {
     std::string source = "(hello)";
     mclexer::Lexer my_lexer(&source);
 
-    mctoken::TokenLocation start_location(1, 1);
-    mctoken::TokenLocation identifier_location(1, 2);
-    mctoken::TokenLocation end_location(1, 7);
+    mctoken::Token start_token;
+    mctoken::Token identifier_token;
+    mctoken::Token end_token;
 
-    mctoken::Token start_token(start_location, mctoken::token_statement_start, "(");
-    mctoken::Token identifier_token(identifier_location, mctoken::token_identifier, "hello");
-    mctoken::Token end_token(end_location, mctoken::token_statement_end, ")");
+    start_token.fulfill(mctoken::TokenLocation(1, 1), mctoken::token_symbol, "(");
+    identifier_token.fulfill(mctoken::TokenLocation(1, 2), mctoken::token_identifier, "hello");
+    end_token.fulfill(mctoken::TokenLocation(1, 7), mctoken::token_symbol, ")");
 
     std::vector<mctoken::Token> tokens;
     my_lexer.tokenize(&tokens);
@@ -67,19 +67,17 @@ TEST(LexerTest, ParsesMultipleIdentifiers) {
     std::string source = "(a\n b c)";
     mclexer::Lexer my_lexer(&source);
 
-    mctoken::TokenLocation start_location(1, 1);
-    mctoken::TokenLocation first_identifier_location(1, 2);
-    mctoken::TokenLocation second_identifier_location(2, 2);
-    mctoken::TokenLocation third_identifier_location(2, 4);
-    mctoken::TokenLocation end_location(2, 5);
+    mctoken::Token start_token;
+    mctoken::Token first_identifier_token;
+    mctoken::Token second_identifier_token;
+    mctoken::Token third_identifier_token;
+    mctoken::Token end_token;
 
-    mctoken::Token start_token(start_location, mctoken::token_statement_start, "(");
-
-    mctoken::Token first_identifier_token(first_identifier_location, mctoken::token_identifier, "a");
-    mctoken::Token second_identifier_token(second_identifier_location, mctoken::token_identifier, "b");
-    mctoken::Token third_identifier_token(third_identifier_location, mctoken::token_identifier, "c");
-
-    mctoken::Token end_token(end_location, mctoken::token_statement_end, ")");
+    start_token.fulfill(mctoken::TokenLocation(1, 1), mctoken::token_symbol, "(");
+    first_identifier_token.fulfill(mctoken::TokenLocation(1, 2), mctoken::token_identifier, "a");
+    second_identifier_token.fulfill(mctoken::TokenLocation(2, 2), mctoken::token_identifier, "b");
+    third_identifier_token.fulfill(mctoken::TokenLocation(2, 4), mctoken::token_identifier, "c");
+    end_token.fulfill(mctoken::TokenLocation(2, 5), mctoken::token_symbol, ")");
 
     std::vector<mctoken::Token> tokens;
     my_lexer.tokenize(&tokens);
@@ -97,17 +95,15 @@ TEST(LexerTest, ParsesFunctionSymbol) {
     std::string source = "(fun a)";
     mclexer::Lexer my_lexer(&source);
 
-    mctoken::TokenLocation start_location(1, 1);
-    mctoken::TokenLocation function_location(1, 2);
-    mctoken::TokenLocation identifier_location(1, 6);
-    mctoken::TokenLocation end_location(1, 7);
+    mctoken::Token start_token;
+    mctoken::Token function_token;
+    mctoken::Token identifier_token;
+    mctoken::Token end_token;
 
-    mctoken::Token start_token(start_location, mctoken::token_statement_start, "(");
-
-    mctoken::Token function_token(function_location, mctoken::token_keyword, "fun");
-    mctoken::Token identifier_token(identifier_location, mctoken::token_identifier, "a");
-
-    mctoken::Token end_token(end_location, mctoken::token_statement_end, ")");
+    start_token.fulfill(mctoken::TokenLocation(1, 1), mctoken::token_symbol, "(");
+    function_token.fulfill(mctoken::TokenLocation(1, 2), mctoken::token_keyword, "fun");
+    identifier_token.fulfill(mctoken::TokenLocation(1, 6), mctoken::token_identifier, "a");
+    end_token.fulfill(mctoken::TokenLocation(1, 7), mctoken::token_symbol, ")");
 
     std::vector<mctoken::Token> tokens;
     my_lexer.tokenize(&tokens);
@@ -130,11 +126,11 @@ TEST(LexerTest, ParsesNumberWhenAnWordStartsWithANumber) {
     mctoken::Token fourthToken;
     mctoken::Token fifthToken;
 
-    firstToken.update(mctoken::TokenLocation(1, 1), mctoken::token_number, "13win");
-    secondToken.update(mctoken::TokenLocation(1, 7), mctoken::token_number, "13.13");
-    thirdToken.update(mctoken::TokenLocation(1, 13), mctoken::token_number, "13");
-    fourthToken.update(mctoken::TokenLocation(1, 16), mctoken::token_number, "45");
-    fifthToken.update(mctoken::TokenLocation(1, 18), mctoken::token_number, "13");
+    firstToken.fulfill(mctoken::TokenLocation(1, 1), mctoken::token_number, "13win");
+    secondToken.fulfill(mctoken::TokenLocation(1, 7), mctoken::token_number, "13.13");
+    thirdToken.fulfill(mctoken::TokenLocation(1, 13), mctoken::token_number, "13");
+    fourthToken.fulfill(mctoken::TokenLocation(1, 16), mctoken::token_number, "45");
+    fifthToken.fulfill(mctoken::TokenLocation(1, 18), mctoken::token_number, "13");
 
     std::vector<mctoken::Token> tokens;
     my_lexer.tokenize(&tokens);

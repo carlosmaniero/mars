@@ -9,7 +9,7 @@ mctoken::Token::Token(TokenLocation location, TokenKind kind, std::string value)
 
 mctoken::Token::Token() : location(TokenLocation(-1, -1)), found(false) {}
 
-void mctoken::Token::update(TokenLocation location, TokenKind kind, std::string value) {
+void mctoken::Token::fulfill(TokenLocation location, TokenKind kind, std::string value) {
     this->location = location;
     this->kind = kind;
     this->value = value;

@@ -14,8 +14,7 @@ static std::string const keywords[] = { // NOLINT
 
 enum TokenKind {
   token_eof,
-  token_statement_start,
-  token_statement_end,
+  token_symbol,
   token_string,
   token_keyword,
   token_number,
@@ -40,7 +39,7 @@ class Token {
     Token();
     Token(TokenLocation location, TokenKind kind, std::string value);
 
-    void update(TokenLocation location, TokenKind kind, std::string value);
+    void fulfill(TokenLocation location, TokenKind kind, std::string value);
 };
 }  // namespace mctoken
 
