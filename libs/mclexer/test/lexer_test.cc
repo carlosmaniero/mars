@@ -15,11 +15,10 @@ void compareTokens(mctoken::Token token1, mctoken::Token token2) {
 TEST(LexerTest, ReturnsAnEmptyListGivenAnEmptyInput) {
     std::string source = "";
     mclexer::Lexer my_lexer(&source);
-    std::vector<mctoken::Token> tokens;
 
-    my_lexer.tokenize(&tokens);
+    auto tokens = my_lexer.tokenize();
 
-    EXPECT_EQ(tokens.size(), 0);
+    EXPECT_EQ(tokens->size(), 0);
 }
 
 TEST(LexerTest, ParsesOpenAndCloseStatement) {
@@ -32,13 +31,12 @@ TEST(LexerTest, ParsesOpenAndCloseStatement) {
     start_token.fulfill(mctoken::TokenLocation(1, 1), mctoken::token_symbol, "(");
     end_token.fulfill(mctoken::TokenLocation(2, 2), mctoken::token_symbol, ")");
 
-    std::vector<mctoken::Token> tokens;
-    my_lexer.tokenize(&tokens);
+    auto tokens = my_lexer.tokenize();
 
-    EXPECT_EQ(tokens.size(), 2);
+    EXPECT_EQ(tokens->size(), 2);
 
-    compareTokens(tokens.at(0), start_token);
-    compareTokens(tokens.at(1), end_token);
+    compareTokens(tokens->at(0), start_token);
+    compareTokens(tokens->at(1), end_token);
 }
 
 TEST(LexerTest, ParsesAIdentifier) {
@@ -53,14 +51,13 @@ TEST(LexerTest, ParsesAIdentifier) {
     identifier_token.fulfill(mctoken::TokenLocation(1, 2), mctoken::token_identifier, "hello");
     end_token.fulfill(mctoken::TokenLocation(1, 7), mctoken::token_symbol, ")");
 
-    std::vector<mctoken::Token> tokens;
-    my_lexer.tokenize(&tokens);
+    auto tokens = my_lexer.tokenize();
 
-    EXPECT_EQ(tokens.size(), 3);
+    EXPECT_EQ(tokens->size(), 3);
 
-    compareTokens(tokens.at(0), start_token);
-    compareTokens(tokens.at(1), identifier_token);
-    compareTokens(tokens.at(2), end_token);
+    compareTokens(tokens->at(0), start_token);
+    compareTokens(tokens->at(1), identifier_token);
+    compareTokens(tokens->at(2), end_token);
 }
 
 TEST(LexerTest, ParsesMultipleIdentifiers) {
@@ -79,16 +76,15 @@ TEST(LexerTest, ParsesMultipleIdentifiers) {
     third_identifier_token.fulfill(mctoken::TokenLocation(2, 4), mctoken::token_identifier, "c");
     end_token.fulfill(mctoken::TokenLocation(2, 5), mctoken::token_symbol, ")");
 
-    std::vector<mctoken::Token> tokens;
-    my_lexer.tokenize(&tokens);
+    auto tokens = my_lexer.tokenize();
 
-    EXPECT_EQ(tokens.size(), 5);
+    EXPECT_EQ(tokens->size(), 5);
 
-    compareTokens(tokens.at(0), start_token);
-    compareTokens(tokens.at(1), first_identifier_token);
-    compareTokens(tokens.at(2), second_identifier_token);
-    compareTokens(tokens.at(3), third_identifier_token);
-    compareTokens(tokens.at(4), end_token);
+    compareTokens(tokens->at(0), start_token);
+    compareTokens(tokens->at(1), first_identifier_token);
+    compareTokens(tokens->at(2), second_identifier_token);
+    compareTokens(tokens->at(3), third_identifier_token);
+    compareTokens(tokens->at(4), end_token);
 }
 
 TEST(LexerTest, ParsesFunctionSymbol) {
@@ -105,15 +101,14 @@ TEST(LexerTest, ParsesFunctionSymbol) {
     identifier_token.fulfill(mctoken::TokenLocation(1, 6), mctoken::token_identifier, "a");
     end_token.fulfill(mctoken::TokenLocation(1, 7), mctoken::token_symbol, ")");
 
-    std::vector<mctoken::Token> tokens;
-    my_lexer.tokenize(&tokens);
+    auto tokens = my_lexer.tokenize();
 
-    EXPECT_EQ(tokens.size(), 4);
+    EXPECT_EQ(tokens->size(), 4);
 
-    compareTokens(tokens.at(0), start_token);
-    compareTokens(tokens.at(1), function_token);
-    compareTokens(tokens.at(2), identifier_token);
-    compareTokens(tokens.at(3), end_token);
+    compareTokens(tokens->at(0), start_token);
+    compareTokens(tokens->at(1), function_token);
+    compareTokens(tokens->at(2), identifier_token);
+    compareTokens(tokens->at(3), end_token);
 }
 
 TEST(LexerTest, ParsesNumberWhenAnWordStartsWithANumber) {
@@ -132,14 +127,14 @@ TEST(LexerTest, ParsesNumberWhenAnWordStartsWithANumber) {
     fourthToken.fulfill(mctoken::TokenLocation(1, 16), mctoken::token_number, "45");
     fifthToken.fulfill(mctoken::TokenLocation(1, 18), mctoken::token_number, "13");
 
-    std::vector<mctoken::Token> tokens;
-    my_lexer.tokenize(&tokens);
+    std::vector<mctoken::Token> myRefToken;
+    auto tokens = my_lexer.tokenize();
 
-    EXPECT_EQ(tokens.size(), 5);
+    EXPECT_EQ(tokens->size(), 5);
 
-    compareTokens(tokens.at(0), firstToken);
-    compareTokens(tokens.at(1), secondToken);
-    compareTokens(tokens.at(2), thirdToken);
-    compareTokens(tokens.at(3), fourthToken);
-    compareTokens(tokens.at(4), fifthToken);
+    compareTokens(tokens->at(0), firstToken);
+    compareTokens(tokens->at(1), secondToken);
+    compareTokens(tokens->at(2), thirdToken);
+    compareTokens(tokens->at(3), fourthToken);
+    compareTokens(tokens->at(4), fifthToken);
 }

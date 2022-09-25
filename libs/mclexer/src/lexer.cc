@@ -55,7 +55,9 @@ bool mclexer::Lexer::pushTokenFromCurrentChar(std::vector<mctoken::Token>* token
     return false;
 }
 
-void mclexer::Lexer::tokenize(std::vector<mctoken::Token>* tokens) {
+std::unique_ptr<std::vector<mctoken::Token>> mclexer::Lexer::tokenize() {
+    auto tokens = std::make_unique<std::vector<mctoken::Token>>();
+
     reset();
 
     std::string:: iterator currentCharIterator;
@@ -63,23 +65,24 @@ void mclexer::Lexer::tokenize(std::vector<mctoken::Token>* tokens) {
     for (currentCharIterator = (*source).begin(); currentCharIterator != (*source).end(); currentCharIterator++) {
         nextColumn();
 
-        if (this->pushTokenFromCurrentChar(tokens, &*currentCharIterator)) {
+        if (this->pushTokenFromCurrentChar(tokens.get(), &*currentCharIterator)) {
             continue;
         }
 
         if (*currentCharIterator == '\n') {
-            this->pushTokenWhenWordIsPresent(tokens);
+            this->pushTokenWhenWordIsPresent(tokens.get());
             nextLine();
             continue;
         }
 
         if (*currentCharIterator == ' ' || *currentCharIterator == ',') {
-            this->pushTokenWhenWordIsPresent(tokens);
+            this->pushTokenWhenWordIsPresent(tokens.get());
             continue;
         }
 
 
         currentWord.push_back(*currentCharIterator);
     }
-    this->pushTokenWhenWordIsPresent(tokens);
+    this->pushTokenWhenWordIsPresent(tokens.get());
+    return std::move(tokens);
 }

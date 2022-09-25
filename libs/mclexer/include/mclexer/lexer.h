@@ -2,6 +2,7 @@
 
 #ifndef LIBS_MCLEXER_INCLUDE_MCLEXER_LEXER_H_
 #define LIBS_MCLEXER_INCLUDE_MCLEXER_LEXER_H_
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -12,7 +13,7 @@ namespace mclexer {
 class Lexer {
  public:
     std::string* source;
-    void tokenize(std::vector<mctoken::Token>* tokens);
+    std::unique_ptr<std::vector<mctoken::Token>> tokenize();
 
     explicit Lexer(std::string* source);
  private:
