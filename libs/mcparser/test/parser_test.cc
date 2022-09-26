@@ -6,6 +6,12 @@
 #include "mclexer/token.h"
 #include "mcparser/parser.h"
 
+#define EXPECT_EQ_ERRORS(givenError, expectedError) { \
+  EXPECT_EQ(givenError.message, expectedError.message);\
+  EXPECT_EQ(givenError.location.column, expectedError.location.column);\
+  EXPECT_EQ(givenError.location.line, expectedError.location.line);\
+}
+
 class TestAST { };
 
 class NamespaceTestAst : public TestAST {
@@ -74,7 +80,7 @@ TEST(Parser, DeclaringNamespacesWithoutAnIndentifier) {
 
   auto expectedError = mcparser::ParserError::missingNamespaceIdentifier(mclexer::TokenLocation(1, 11));
 
-  compareError(&errors.at(0), &expectedError);
+  EXPECT_EQ_ERRORS(errors.at(0), expectedError);
 }
 
 TEST(Parser, DeclaringNamespacesDoesNotStartsWithOpenStatement) {
@@ -95,7 +101,7 @@ TEST(Parser, DeclaringNamespacesDoesNotStartsWithOpenStatement) {
   EXPECT_EQ(errors.size(), 1);
 
   auto expectedError = mcparser::ParserError::openParenthesisExpected(
-    mclexer::TokenLocation(3, 2), "namespace");
+    mclexer::TokenLocation(3, 3), "namespace");
 
-  compareError(&errors.at(0), &expectedError);
+  EXPECT_EQ_ERRORS(errors.at(0), expectedError);
 }

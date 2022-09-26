@@ -125,7 +125,7 @@ TEST(LexerTest, ParsesNumberWhenAnWordStartsWithANumber) {
     secondToken.fulfill(mclexer::TokenLocation(1, 7), mclexer::token_number, "13.13");
     thirdToken.fulfill(mclexer::TokenLocation(1, 13), mclexer::token_number, "13");
     fourthToken.fulfill(mclexer::TokenLocation(1, 16), mclexer::token_number, "45");
-    fifthToken.fulfill(mclexer::TokenLocation(1, 18), mclexer::token_number, "13");
+    fifthToken.fulfill(mclexer::TokenLocation(1, 19), mclexer::token_number, "13");
 
     std::vector<mclexer::Token> myRefToken;
     auto tokens = my_lexer.tokenize();
