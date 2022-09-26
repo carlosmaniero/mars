@@ -60,27 +60,26 @@ std::unique_ptr<std::vector<mclexer::Token>> mclexer::Lexer::tokenize() {
 
     reset();
 
-    std::string:: iterator currentCharIterator;
-
-    for (currentCharIterator = (*source).begin(); currentCharIterator != (*source).end(); currentCharIterator++) {
+    for (int charIndex = 0; charIndex < source->length(); charIndex++) {
+        auto currentCharIterator = source->at(charIndex);
         nextColumn();
 
-        if (this->pushTokenFromCurrentChar(tokens.get(), &*currentCharIterator)) {
+        if (this->pushTokenFromCurrentChar(tokens.get(), &currentCharIterator)) {
             continue;
         }
 
-        if (*currentCharIterator == '\n') {
+        if (currentCharIterator == '\n') {
             this->pushTokenWhenWordIsPresent(tokens.get());
             nextLine();
             continue;
         }
 
-        if (*currentCharIterator == ' ' || *currentCharIterator == ',') {
+        if (currentCharIterator == ' ' || currentCharIterator == ',') {
             this->pushTokenWhenWordIsPresent(tokens.get());
             continue;
         }
 
-        currentWord.push_back(*currentCharIterator);
+        currentWord.push_back(currentCharIterator);
     }
 
     this->pushTokenWhenWordIsPresent(tokens.get());
