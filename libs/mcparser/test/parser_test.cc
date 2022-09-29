@@ -12,52 +12,68 @@
   EXPECT_EQ(givenError.location.line, expectedError.location.line);\
 }
 
-class TestAST { };
-
-class NamespaceTestAst : public TestAST {
+class TestParserContext : public mcparser::IParserContext {
  public:
-    std::string namespaceName;
-    std::vector<TestAST> children;
-};
-
-class TestParserContext : public mcparser::IParserContext<TestAST> {
- public:
-    std::unique_ptr<TestAST> buildNamespace(
+    std::unique_ptr<mcparser::NamespaceASTNode> buildNamespace(
         std::string namespaceName,
-        std::unique_ptr<std::vector<TestAST>> children) {
-      auto ast = std::make_unique<NamespaceTestAst>();
+        std::vector<std::unique_ptr<mcparser::ASTNode>> children) {
+      auto ast = std::make_unique<mcparser::NamespaceASTNode>();
 
-      ast->namespaceName = namespaceName;
-      ast->children = *children.get();
+      ast->identifier = namespaceName;
+      ast->nodes = std::move(children);
 
       return std::move(ast);
     }
+    std::unique_ptr<mcparser::DefStatementASTNode> buildDef(
+        std::string identifier,
+        mcparser::NodeVisibility visibility,
+        std::unique_ptr<mcparser::ASTNode> node) {
+        auto def = std::make_unique<mcparser::DefStatementASTNode>();
+
+        def->identifier = identifier;
+        def->visibility = visibility;
+        def->value = std::move(node);
+
+        return std::move(def);
+    }
+
+    std::unique_ptr<mcparser::IntegerASTNode> buildInteger(
+        int value) {
+        auto intAst = std::make_unique<mcparser::IntegerASTNode>();
+        intAst->value = value;
+        return std::move(intAst);
+    }
 };
 
-void compareError(mcparser::ParserError* givenError, mcparser::ParserError* expectedError) {
-  EXPECT_EQ(givenError->message, expectedError->message);
-  EXPECT_EQ(givenError->location.column, expectedError->location.column);
-  EXPECT_EQ(givenError->location.line, expectedError->location.line);
+TEST(Parser, EmptySource) {
+  auto tokens = std::make_unique<std::vector<mclexer::Token>>();
+  std::unique_ptr<mcparser::IParserContext> context = std::make_unique<TestParserContext>();
+
+  mcparser::Parser parser;
+
+  auto ast = parser.parse(std::move(context), std::move(tokens));
+
+  EXPECT_EQ(ast, nullptr);
+  EXPECT_EQ(parser.getErrors().size(), 0);
 }
 
 TEST(Parser, DeclaringNamespaces) {
-  // Given a namespace name
   std::string source = "(namespace my-ns)";
   mclexer::Lexer lexer(&source);
 
   auto tokens = lexer.tokenize();
 
-  std::unique_ptr<mcparser::IParserContext<TestAST>> context = std::make_unique<TestParserContext>();
-  mcparser::Parser<TestAST> parser;
+  std::unique_ptr<mcparser::IParserContext> context = std::make_unique<TestParserContext>();
+  mcparser::Parser parser;
 
   auto ast = parser.parse(std::move(context), std::move(tokens));
-  auto astValue = reinterpret_cast<NamespaceTestAst*>(ast.get());
+  auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
 
   EXPECT_NE(ast, nullptr);
 
   if (ast != nullptr) {
-    EXPECT_EQ(astValue->namespaceName, "my-ns");
-    EXPECT_EQ(astValue->children.size(), 0);
+    EXPECT_EQ(astValue->identifier, "my-ns");
+    EXPECT_EQ(astValue->nodes.size(), 0);
     EXPECT_EQ(parser.getErrors().size(), 0);
   }
 }
@@ -69,16 +85,39 @@ TEST(Parser, DeclaringNamespacesWithoutAnIndentifier) {
   auto tokens = lexer.tokenize();
   auto context = std::make_unique<TestParserContext>();
 
-  mcparser::Parser<TestAST> parser;
+  mcparser::Parser parser;
   auto ast = parser.parse(std::move(context), std::move(tokens));
-  auto astValue = reinterpret_cast<NamespaceTestAst*>(ast.get());
+  auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
 
   EXPECT_EQ(ast, nullptr);
   auto errors = parser.getErrors();
 
   EXPECT_EQ(errors.size(), 1);
 
-  auto expectedError = mcparser::ParserError::missingNamespaceIdentifier(mclexer::TokenLocation(1, 11));
+  auto expectedError = mcparser::ParserError::missingIdentifier(
+    mclexer::Token(mclexer::TokenLocation(1, 11), mclexer::token_symbol, ")"));
+
+  EXPECT_EQ_ERRORS(errors.at(0), expectedError);
+}
+
+TEST(Parser, DeclaringNamespacesWithAnNonIdentifier) {
+  std::string source = "(namespace fun)";
+  mclexer::Lexer lexer(&source);
+
+  auto tokens = lexer.tokenize();
+  auto context = std::make_unique<TestParserContext>();
+
+  mcparser::Parser parser;
+  auto ast = parser.parse(std::move(context), std::move(tokens));
+  auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
+
+  EXPECT_EQ(ast, nullptr);
+  auto errors = parser.getErrors();
+
+  EXPECT_EQ(errors.size(), 1);
+
+  auto expectedError = mcparser::ParserError::invalidIdentifier(
+    mclexer::Token(mclexer::TokenLocation(1, 12), mclexer::token_keyword, "fun"));
 
   EXPECT_EQ_ERRORS(errors.at(0), expectedError);
 }
@@ -90,10 +129,10 @@ TEST(Parser, DeclaringNamespacesDoesNotStartsWithOpenStatement) {
   auto tokens = lexer.tokenize();
   auto context = std::make_unique<TestParserContext>();
 
-  mcparser::Parser<TestAST> parser;
+  mcparser::Parser parser;
 
   auto ast = parser.parse(std::move(context), std::move(tokens));
-  auto astValue = reinterpret_cast<NamespaceTestAst*>(ast.get());
+  auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
 
   EXPECT_EQ(ast, nullptr);
   auto errors = parser.getErrors();
@@ -101,7 +140,65 @@ TEST(Parser, DeclaringNamespacesDoesNotStartsWithOpenStatement) {
   EXPECT_EQ(errors.size(), 1);
 
   auto expectedError = mcparser::ParserError::openParenthesisExpected(
-    mclexer::TokenLocation(3, 3), "namespace");
+    mclexer::Token(mclexer::TokenLocation(3, 3), mclexer::token_keyword, "namespace"));
 
   EXPECT_EQ_ERRORS(errors.at(0), expectedError);
+}
+
+TEST(Parser, DeclareSomethingAfterStatementEnds) {
+  std::string source = "(namespace my-ns) outsider";
+  mclexer::Lexer lexer(&source);
+
+  auto tokens = lexer.tokenize();
+  auto context = std::make_unique<TestParserContext>();
+
+  mcparser::Parser parser;
+  auto ast = parser.parse(std::move(context), std::move(tokens));
+  auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
+
+  EXPECT_EQ(ast, nullptr);
+  auto errors = parser.getErrors();
+
+  EXPECT_EQ(errors.size(), 1);
+
+  auto expectedError = mcparser::ParserError::notExpectedToken(
+    mclexer::Token(mclexer::TokenLocation(1, 19), mclexer::token_identifier, "outsider"));
+
+  EXPECT_EQ_ERRORS(errors.at(0), expectedError);
+}
+
+TEST(Parser, DefiningPublicIntegers) {
+  std::string source = "(namespace my-ns (def my-number 13)(def vice-number 45))";
+  mclexer::Lexer lexer(&source);
+
+  auto tokens = lexer.tokenize();
+  auto context = std::make_unique<TestParserContext>();
+
+  mcparser::Parser parser;
+  auto ast = parser.parse(std::move(context), std::move(tokens));
+  auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
+
+  EXPECT_NE(ast, nullptr);
+
+  if (ast != nullptr) {
+    EXPECT_EQ(parser.getErrors().size(), 0);
+
+    EXPECT_EQ(astValue->nodes.size(), 2);
+
+    auto def = reinterpret_cast<mcparser::DefStatementASTNode*>(astValue->nodes.at(0).get());
+
+    EXPECT_EQ(def->identifier, "my-number");
+    EXPECT_EQ(def->visibility, mcparser::node_visibility_public);
+
+    auto value = reinterpret_cast<mcparser::IntegerASTNode*>(def->value.get());
+
+    def = reinterpret_cast<mcparser::DefStatementASTNode*>(astValue->nodes.at(1).get());
+
+    EXPECT_EQ(def->identifier, "vice-number");
+    EXPECT_EQ(def->visibility, mcparser::node_visibility_public);
+
+    value = reinterpret_cast<mcparser::IntegerASTNode*>(def->value.get());
+
+    EXPECT_EQ(value->value, 45);
+  }
 }

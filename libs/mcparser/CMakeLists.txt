@@ -10,6 +10,7 @@ set(LIBRARY_HEADERS_DIR
     include/${LIBRARY_NAME}
 )
 set(LIBRARY_HEADERS
+    ${LIBRARY_HEADERS_DIR}/ast.h
     ${LIBRARY_HEADERS_DIR}/context.h
     ${LIBRARY_HEADERS_DIR}/parser.h
 )
@@ -17,6 +18,7 @@ set(LIBRARY_SOURCE_DIR
     src
 )
 set(LIBRARY_SOURCE
+    ${LIBRARY_SOURCE_DIR}/ast.cc
     ${LIBRARY_SOURCE_DIR}/context.cc
     ${LIBRARY_SOURCE_DIR}/parser.cc
 )

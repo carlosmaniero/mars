@@ -19,40 +19,36 @@ class ParserError {
 
      ParserError(mclexer::TokenLocation location, std::string message) : location {location}, message { message } {};
 
-     static ParserError missingNamespaceIdentifier(mclexer::TokenLocation tokenLocation);
-     static ParserError openParenthesisExpected(mclexer::TokenLocation tokenLocation, std::string found);
+     static ParserError missingIdentifier(mclexer::Token token);
+     static ParserError openParenthesisExpected(mclexer::Token token);
+     static ParserError notExpectedToken(mclexer::Token token);
+     static ParserError invalidIdentifier(mclexer::Token token);
 };
 
-template <class TAST> class Parser {
+class Parser {
  public:
-     std::unique_ptr<TAST> parse(
-         std::unique_ptr<mcparser::IParserContext<TAST>> parserContext,
-         std::unique_ptr<std::vector<mclexer::Token>> tokens
-     ) {
-         for (int tokenIndex = 0; tokenIndex < tokens->size(); tokenIndex++) {
-             if (tokenIndex == 0) {
-                 if (tokens->at(0).kind != mclexer::token_symbol && tokens->at(0).value != "(") {
-                     this->errors.push_back(
-                         mcparser::ParserError::openParenthesisExpected(
-                             tokens->at(0).location,
-                             tokens->at(0).value));
-                     return nullptr;
-                 }
-             }
-         }
-         if (tokens->size() != 4) {
-             this->errors.push_back(mcparser::ParserError::missingNamespaceIdentifier(mclexer::TokenLocation(1, 11)));
-             return nullptr;
-         }
-         return std::move(parserContext->buildNamespace("my-ns", std::make_unique<std::vector<TAST>>()));
-     }
+     std::unique_ptr<mcparser::ASTNode> parse(
+         std::unique_ptr<mcparser::IParserContext> parserContext,
+         std::unique_ptr<std::vector<mclexer::Token>> tokens);
 
-     std::vector<ParserError> getErrors() {
-         return errors;
-     }
-
+     std::vector<ParserError> getErrors();
  private:
+     int tokenIndex = 0;
      std::vector<ParserError> errors;
+     mclexer::Token eatNextToken(std::vector<mclexer::Token>* tokens);
+     std::unique_ptr<mclexer::Token> eatNextIdentifierToken(std::vector<mclexer::Token>* tokens);
+     std::unique_ptr<mcparser::NamespaceASTNode> parseNamespace(
+         mcparser::IParserContext* parserContext,
+         std::vector<mclexer::Token>* tokens);
+     std::unique_ptr<mcparser::DefStatementASTNode> parseDef(
+         mcparser::IParserContext* parserContext,
+         std::vector<mclexer::Token>* tokens);
+     std::unique_ptr<mcparser::ASTNode> parseNode(
+         mcparser::IParserContext* parserContext,
+         std::vector<mclexer::Token>* tokens);
+     std::unique_ptr<mcparser::IntegerASTNode> parseInteger(
+         mcparser::IParserContext* parserContext,
+         std::vector<mclexer::Token>* tokens);
 };
 }  // namespace mcparser
 #endif  // LIBS_MCPARSER_INCLUDE_MCPARSER_PARSER_H_
