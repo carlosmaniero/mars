@@ -120,7 +120,12 @@ std::unique_ptr<mcparser::NamespaceASTNode> mcparser::Parser::parseNamespace(
         }
     }
 
-    return std::move(parserContext->buildNamespace(namespaceNameToken->value, std::move(nodes)));
+    auto ast = std::make_unique<mcparser::NamespaceASTNode>();
+
+    ast->identifier = namespaceNameToken->value;
+    ast->nodes = std::move(nodes);
+
+    return std::move(ast);
 }
 
 std::vector<mcparser::ParserError> mcparser::Parser::getErrors() {
