@@ -12,12 +12,15 @@ enum NodeVisibility {
   node_visibility_private
 };
 
-class ASTNode {};
+class ASTNode {
+ public:
+  virtual ~ASTNode() = default;
+};
 
 class NamespaceASTNode : public ASTNode {
  public:
      std::string identifier;
-     std::vector<std::unique_ptr<ASTNode>> nodes;
+     std::vector<std::shared_ptr<ASTNode>> nodes;
 };
 
 class IntegerASTNode : public ASTNode {

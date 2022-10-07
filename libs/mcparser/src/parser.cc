@@ -38,7 +38,7 @@ std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parse(
     // eat namespace
     this->eatNextToken(tokens.get());
 
-    return std::move(this->parseNamespace(parserContext.get(), tokens.get()));
+    return this->parseNamespace(parserContext.get(), tokens.get());
 }
 
 mclexer::Token mcparser::Parser::eatNextToken(std::vector<mclexer::Token>* tokens) {
@@ -66,7 +66,7 @@ std::unique_ptr<mcparser::IntegerASTNode> mcparser::Parser::parseInteger(
     std::vector<mclexer::Token>* tokens) {
     auto token = this->eatNextToken(tokens);
 
-    return std::move(parserContext->buildInteger(std::stoi(token.value)));
+    return parserContext->buildInteger(std::stoi(token.value));
 }
 
 std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parseNode(
@@ -85,10 +85,13 @@ std::unique_ptr<mcparser::DefStatementASTNode> mcparser::Parser::parseDef(
         return nullptr;
     }
 
-    return parserContext->buildDef(
-        identifier->value,
-        mcparser::node_visibility_public,
-        this->parseNode(parserContext, tokens));
+    auto def = std::make_unique<mcparser::DefStatementASTNode>();
+
+    def->identifier = identifier->value;
+    def->visibility = mcparser::node_visibility_public;
+    def->value = this->parseNode(parserContext, tokens);
+
+    return def;
 }
 
 std::unique_ptr<mcparser::NamespaceASTNode> mcparser::Parser::parseNamespace(
@@ -105,7 +108,7 @@ std::unique_ptr<mcparser::NamespaceASTNode> mcparser::Parser::parseNamespace(
         return nullptr;
     }
 
-    auto nodes = std::vector<std::unique_ptr<mcparser::ASTNode>>();
+    auto nodes = std::vector<std::shared_ptr<mcparser::ASTNode>>();
 
     while (this->tokenIndex < tokens->size()) {
         auto token = this->eatNextToken(tokens);
@@ -123,9 +126,9 @@ std::unique_ptr<mcparser::NamespaceASTNode> mcparser::Parser::parseNamespace(
     auto ast = std::make_unique<mcparser::NamespaceASTNode>();
 
     ast->identifier = namespaceNameToken->value;
-    ast->nodes = std::move(nodes);
+    ast->nodes = nodes;
 
-    return std::move(ast);
+    return ast;
 }
 
 std::vector<mcparser::ParserError> mcparser::Parser::getErrors() {

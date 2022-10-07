@@ -17,12 +17,7 @@ class TestParserContext : public mcparser::IParserContext {
     std::unique_ptr<mcparser::NamespaceASTNode> buildNamespace(
         std::string namespaceName,
         std::vector<std::unique_ptr<mcparser::ASTNode>> children) {
-      auto ast = std::make_unique<mcparser::NamespaceASTNode>();
-
-      ast->identifier = namespaceName;
-      ast->nodes = std::move(children);
-
-      return std::move(ast);
+      return nullptr;
     }
     std::unique_ptr<mcparser::DefStatementASTNode> buildDef(
         std::string identifier,

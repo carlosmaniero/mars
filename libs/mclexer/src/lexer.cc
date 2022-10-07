@@ -85,5 +85,5 @@ std::unique_ptr<std::vector<mclexer::Token>> mclexer::Lexer::tokenize() {
     nextColumn();
 
     this->pushTokenWhenWordIsPresent(tokens.get());
-    return std::move(tokens);
+    return tokens;
 }
