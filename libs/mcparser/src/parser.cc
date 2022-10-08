@@ -1,6 +1,7 @@
 // Copyright 2022 Maniero
 
 #include "mcparser/parser.h"
+#include <string>
 
 MAKE_ERROR::missingIdentifier(mclexer::Token token) {
     return mcparser::ParserError(token.location, "missing identifier: you must provide an identifier.");
@@ -19,7 +20,6 @@ MAKE_ERROR::invalidIdentifier(mclexer::Token token) {
 }
 
 std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parse(
-    std::unique_ptr<mcparser::IParserContext> parserContext,
     std::unique_ptr<std::vector<mclexer::Token>> tokens
 ) {
     if (tokens->empty()) {
@@ -38,7 +38,7 @@ std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parse(
     // eat namespace
     this->eatNextToken(tokens.get());
 
-    return this->parseNamespace(parserContext.get(), tokens.get());
+    return this->parseNamespace(tokens.get());
 }
 
 mclexer::Token mcparser::Parser::eatNextToken(std::vector<mclexer::Token>* tokens) {
@@ -62,22 +62,20 @@ std::unique_ptr<mclexer::Token> mcparser::Parser::eatNextIdentifierToken(std::ve
 }
 
 std::unique_ptr<mcparser::IntegerASTNode> mcparser::Parser::parseInteger(
-    mcparser::IParserContext* parserContext,
     std::vector<mclexer::Token>* tokens) {
     auto token = this->eatNextToken(tokens);
-
-    return parserContext->buildInteger(std::stoi(token.value));
+    auto intAst = std::make_unique<mcparser::IntegerASTNode>();
+    intAst->value = std::stoi(token.value);
+    return std::move(intAst);
 }
 
 std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parseNode(
-    mcparser::IParserContext* parserContext,
     std::vector<mclexer::Token>* tokens) {
 
-    return this->parseInteger(parserContext, tokens);
+    return this->parseInteger(tokens);
 }
 
 std::unique_ptr<mcparser::DefStatementASTNode> mcparser::Parser::parseDef(
-    mcparser::IParserContext* parserContext,
     std::vector<mclexer::Token>* tokens) {
     auto identifier = this->eatNextIdentifierToken(tokens);
 
@@ -89,13 +87,12 @@ std::unique_ptr<mcparser::DefStatementASTNode> mcparser::Parser::parseDef(
 
     def->identifier = identifier->value;
     def->visibility = mcparser::node_visibility_public;
-    def->value = this->parseNode(parserContext, tokens);
+    def->value = this->parseNode(tokens);
 
     return def;
 }
 
 std::unique_ptr<mcparser::NamespaceASTNode> mcparser::Parser::parseNamespace(
-    mcparser::IParserContext* parserContext,
     std::vector<mclexer::Token>* tokens) {
     auto namespaceNameToken = this->eatNextIdentifierToken(tokens);
 
@@ -117,7 +114,7 @@ std::unique_ptr<mcparser::NamespaceASTNode> mcparser::Parser::parseNamespace(
             token = this->eatNextToken(tokens);
 
             if (token.value == "def") {
-                auto def = this->parseDef(parserContext, tokens);
+                auto def = this->parseDef(tokens);
                 nodes.push_back(std::move(def));
             }
         }

@@ -3,6 +3,7 @@
 #ifndef LIBS_MCPARSER_INCLUDE_MCPARSER_PARSER_H_
 #define LIBS_MCPARSER_INCLUDE_MCPARSER_PARSER_H_
 #define MAKE_ERROR mcparser::ParserError mcparser::ParserError
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -28,7 +29,6 @@ class ParserError {
 class Parser {
  public:
      std::unique_ptr<mcparser::ASTNode> parse(
-         std::unique_ptr<mcparser::IParserContext> parserContext,
          std::unique_ptr<std::vector<mclexer::Token>> tokens);
 
      std::vector<ParserError> getErrors();
@@ -38,16 +38,12 @@ class Parser {
      mclexer::Token eatNextToken(std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mclexer::Token> eatNextIdentifierToken(std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mcparser::NamespaceASTNode> parseNamespace(
-         mcparser::IParserContext* parserContext,
          std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mcparser::DefStatementASTNode> parseDef(
-         mcparser::IParserContext* parserContext,
          std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mcparser::ASTNode> parseNode(
-         mcparser::IParserContext* parserContext,
          std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mcparser::IntegerASTNode> parseInteger(
-         mcparser::IParserContext* parserContext,
          std::vector<mclexer::Token>* tokens);
 };
 }  // namespace mcparser

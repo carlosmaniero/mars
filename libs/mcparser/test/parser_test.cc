@@ -12,41 +12,12 @@
   EXPECT_EQ(givenError.location.line, expectedError.location.line);\
 }
 
-class TestParserContext : public mcparser::IParserContext {
- public:
-    std::unique_ptr<mcparser::NamespaceASTNode> buildNamespace(
-        std::string namespaceName,
-        std::vector<std::unique_ptr<mcparser::ASTNode>> children) {
-      return nullptr;
-    }
-    std::unique_ptr<mcparser::DefStatementASTNode> buildDef(
-        std::string identifier,
-        mcparser::NodeVisibility visibility,
-        std::unique_ptr<mcparser::ASTNode> node) {
-        auto def = std::make_unique<mcparser::DefStatementASTNode>();
-
-        def->identifier = identifier;
-        def->visibility = visibility;
-        def->value = std::move(node);
-
-        return std::move(def);
-    }
-
-    std::unique_ptr<mcparser::IntegerASTNode> buildInteger(
-        int value) {
-        auto intAst = std::make_unique<mcparser::IntegerASTNode>();
-        intAst->value = value;
-        return std::move(intAst);
-    }
-};
-
 TEST(Parser, EmptySource) {
   auto tokens = std::make_unique<std::vector<mclexer::Token>>();
-  std::unique_ptr<mcparser::IParserContext> context = std::make_unique<TestParserContext>();
 
   mcparser::Parser parser;
 
-  auto ast = parser.parse(std::move(context), std::move(tokens));
+  auto ast = parser.parse(std::move(tokens));
 
   EXPECT_EQ(ast, nullptr);
   EXPECT_EQ(parser.getErrors().size(), 0);
@@ -58,10 +29,9 @@ TEST(Parser, DeclaringNamespaces) {
 
   auto tokens = lexer.tokenize();
 
-  std::unique_ptr<mcparser::IParserContext> context = std::make_unique<TestParserContext>();
   mcparser::Parser parser;
 
-  auto ast = parser.parse(std::move(context), std::move(tokens));
+  auto ast = parser.parse(std::move(tokens));
   auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
 
   EXPECT_NE(ast, nullptr);
@@ -78,10 +48,9 @@ TEST(Parser, DeclaringNamespacesWithoutAnIndentifier) {
   mclexer::Lexer lexer(&source);
 
   auto tokens = lexer.tokenize();
-  auto context = std::make_unique<TestParserContext>();
 
   mcparser::Parser parser;
-  auto ast = parser.parse(std::move(context), std::move(tokens));
+  auto ast = parser.parse(std::move(tokens));
   auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
 
   EXPECT_EQ(ast, nullptr);
@@ -100,10 +69,9 @@ TEST(Parser, DeclaringNamespacesWithAnNonIdentifier) {
   mclexer::Lexer lexer(&source);
 
   auto tokens = lexer.tokenize();
-  auto context = std::make_unique<TestParserContext>();
 
   mcparser::Parser parser;
-  auto ast = parser.parse(std::move(context), std::move(tokens));
+  auto ast = parser.parse(std::move(tokens));
   auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
 
   EXPECT_EQ(ast, nullptr);
@@ -122,11 +90,10 @@ TEST(Parser, DeclaringNamespacesDoesNotStartsWithOpenStatement) {
   mclexer::Lexer lexer(&source);
 
   auto tokens = lexer.tokenize();
-  auto context = std::make_unique<TestParserContext>();
 
   mcparser::Parser parser;
 
-  auto ast = parser.parse(std::move(context), std::move(tokens));
+  auto ast = parser.parse(std::move(tokens));
   auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
 
   EXPECT_EQ(ast, nullptr);
@@ -145,10 +112,9 @@ TEST(Parser, DeclareSomethingAfterStatementEnds) {
   mclexer::Lexer lexer(&source);
 
   auto tokens = lexer.tokenize();
-  auto context = std::make_unique<TestParserContext>();
 
   mcparser::Parser parser;
-  auto ast = parser.parse(std::move(context), std::move(tokens));
+  auto ast = parser.parse(std::move(tokens));
   auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
 
   EXPECT_EQ(ast, nullptr);
@@ -167,10 +133,9 @@ TEST(Parser, DefiningPublicIntegers) {
   mclexer::Lexer lexer(&source);
 
   auto tokens = lexer.tokenize();
-  auto context = std::make_unique<TestParserContext>();
 
   mcparser::Parser parser;
-  auto ast = parser.parse(std::move(context), std::move(tokens));
+  auto ast = parser.parse(std::move(tokens));
   auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
 
   EXPECT_NE(ast, nullptr);
