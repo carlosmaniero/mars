@@ -24,6 +24,7 @@ class ParserError {
      static ParserError openParenthesisExpected(mclexer::Token token);
      static ParserError notExpectedToken(mclexer::Token token);
      static ParserError invalidIdentifier(mclexer::Token token);
+     static ParserError invalidVisibility(mclexer::Token token);
 };
 
 class Parser {
@@ -37,7 +38,7 @@ class Parser {
      std::vector<ParserError> errors;
      mclexer::Token eatNextToken(std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mclexer::Token> eatNextIdentifierToken(std::vector<mclexer::Token>* tokens);
-     mcparser::NodeVisibility parseVisibilityNode(mclexer::Token* token);
+     std::pair<mcparser::NodeVisibility, bool> parseVisibilityNode(mclexer::Token* token);
      std::unique_ptr<mcparser::NamespaceASTNode> parseNamespace(
          std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mcparser::DefStatementASTNode> parseDef(

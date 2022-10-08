@@ -173,3 +173,51 @@ TEST(Parser, DefiningPublicIntegers) {
     EXPECT_NE(type2, nullptr);
   }
 }
+
+TEST(Parser, DefiningWithInvalidVisibility) {
+  std::string source =
+    "(namespace my-ns \n" \
+    " (def anything Integer my-number 13))";
+  mclexer::Lexer lexer(&source);
+
+  auto tokens = lexer.tokenize();
+
+  mcparser::Parser parser;
+
+  auto ast = parser.parse(std::move(tokens));
+  auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
+
+  auto errors = parser.getErrors();
+
+  EXPECT_EQ(errors.size(), 1);
+
+  auto expectedError = mcparser::ParserError::invalidVisibility(
+    mclexer::Token(mclexer::TokenLocation(2, 7), mclexer::token_identifier, "anything"));
+
+  EXPECT_EQ_ERRORS(errors.at(0), expectedError);
+}
+
+/*TODO: implement this scenario
+TEST(Parser, DefiningWithInvalidVisibility) {
+  std::string source =
+    "(namespace my-ns" \
+    " (def public Integer my-number 13) ";
+  mclexer::Lexer lexer(&source);
+
+  auto tokens = lexer.tokenize();
+
+  mcparser::Parser parser;
+
+  auto ast = parser.parse(std::move(tokens));
+  auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
+
+  auto errors = parser.getErrors();
+
+  EXPECT_EQ(errors.size(), 1);
+
+  auto expectedError = mcparser::ParserError::missingIdentifier(
+    mclexer::Token(mclexer::TokenLocation(1, 11), mclexer::token_symbol, ")"));
+
+  EXPECT_EQ_ERRORS(errors.at(0), expectedError);
+}
+*/

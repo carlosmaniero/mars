@@ -3,6 +3,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <utility>
 #include "mcparser/ast.h"
 #include "mcparser/parser.h"
 
@@ -20,6 +21,12 @@ MAKE_ERROR::notExpectedToken(mclexer::Token token) {
 
 MAKE_ERROR::invalidIdentifier(mclexer::Token token) {
     return mcparser::ParserError(token.location, "invalid identifier: \"" + token.value + "\" token");
+}
+
+MAKE_ERROR::invalidVisibility(mclexer::Token token) {
+    return mcparser::ParserError(
+        token.location,
+        "invalid visibility. Expected (public, private). Found: \"" + token.value + "\" token");
 }
 
 std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parse(
@@ -44,12 +51,14 @@ std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parse(
     return this->parseNamespace(tokens.get());
 }
 
-mcparser::NodeVisibility mcparser::Parser::parseVisibilityNode(mclexer::Token* token) {
+std::pair<mcparser::NodeVisibility, bool> mcparser::Parser::parseVisibilityNode(mclexer::Token* token) {
     if (token->value == "public") {
-        return node_visibility_public;
+        return std::make_pair(node_visibility_public, true);
+    } else if (token->value == "private") {
+        return std::make_pair(node_visibility_private, true);
     }
 
-    return node_visibility_private;
+    return std::make_pair(node_visibility_public, false);
 }
 
 mclexer::Token mcparser::Parser::eatNextToken(std::vector<mclexer::Token>* tokens) {
@@ -102,7 +111,14 @@ std::unique_ptr<mcparser::DefStatementASTNode> mcparser::Parser::parseDef(
 
     def->identifier = identifier->value;
 
-    def->visibility = this->parseVisibilityNode(&visibilityToken);
+    auto parsedVisibility = this->parseVisibilityNode(&visibilityToken);
+
+    if (!parsedVisibility.second) {
+        this->errors.push_back(mcparser::ParserError::invalidVisibility(visibilityToken));
+        return nullptr;
+    }
+
+    def->visibility = parsedVisibility.first;
     def->type = std::make_shared<mcparser::NativeIntegerType>();
     def->value = this->parseNode(tokens);
 
