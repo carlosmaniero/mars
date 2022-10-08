@@ -197,11 +197,9 @@ TEST(Parser, DefiningWithInvalidVisibility) {
   EXPECT_EQ_ERRORS(errors.at(0), expectedError);
 }
 
-/*TODO: implement this scenario
-TEST(Parser, DefiningWithInvalidVisibility) {
+TEST(Parser, MissingNamespaceCloseParen) {
   std::string source =
-    "(namespace my-ns" \
-    " (def public Integer my-number 13) ";
+    "(namespace my-ns";
   mclexer::Lexer lexer(&source);
 
   auto tokens = lexer.tokenize();
@@ -215,9 +213,8 @@ TEST(Parser, DefiningWithInvalidVisibility) {
 
   EXPECT_EQ(errors.size(), 1);
 
-  auto expectedError = mcparser::ParserError::missingIdentifier(
-    mclexer::Token(mclexer::TokenLocation(1, 11), mclexer::token_symbol, ")"));
+  auto expectedError = mcparser::ParserError::closeParenthesisExpected(
+    mclexer::Token(mclexer::TokenLocation(1, 17), mclexer::token_symbol, EOF_TOKEN_VALUE));
 
   EXPECT_EQ_ERRORS(errors.at(0), expectedError);
 }
-*/

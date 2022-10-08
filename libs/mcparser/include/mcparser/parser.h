@@ -22,6 +22,7 @@ class ParserError {
 
      static ParserError missingIdentifier(mclexer::Token token);
      static ParserError openParenthesisExpected(mclexer::Token token);
+     static ParserError closeParenthesisExpected(mclexer::Token token);
      static ParserError notExpectedToken(mclexer::Token token);
      static ParserError invalidIdentifier(mclexer::Token token);
      static ParserError invalidVisibility(mclexer::Token token);

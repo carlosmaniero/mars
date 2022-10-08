@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include "mclexer/token.h"
 #include "mcparser/ast.h"
 #include "mcparser/parser.h"
 
@@ -13,6 +14,10 @@ MAKE_ERROR::missingIdentifier(mclexer::Token token) {
 
 MAKE_ERROR::openParenthesisExpected(mclexer::Token token) {
     return mcparser::ParserError(token.location, "open parenthesis expected: found \"" + token.value + "\"");
+}
+
+MAKE_ERROR::closeParenthesisExpected(mclexer::Token token) {
+    return mcparser::ParserError(token.location, "close parenthesis expected: found \"" + token.value + "\"");
 }
 
 MAKE_ERROR::notExpectedToken(mclexer::Token token) {
@@ -133,22 +138,34 @@ std::unique_ptr<mcparser::NamespaceASTNode> mcparser::Parser::parseNamespace(
         return nullptr;
     }
 
-    if (tokens->size() == 5) {
+    if (tokens->size() == 6) {
         this->errors.push_back(mcparser::ParserError::notExpectedToken(tokens->at(4)));
         return nullptr;
     }
 
     auto nodes = std::vector<std::shared_ptr<mcparser::ASTNode>>();
 
+    int openStatementCount = 1;
     while (this->tokenIndex < tokens->size()) {
         auto token = this->eatNextToken(tokens);
 
         if (token.value == "(") {
+            openStatementCount++;
             token = this->eatNextToken(tokens);
 
             if (token.value == "def") {
                 auto def = this->parseDef(tokens);
                 nodes.push_back(std::move(def));
+            }
+        }
+
+        if (token.value == ")") {
+            openStatementCount--;
+        }
+
+        if (token.value == EOF_TOKEN_VALUE) {
+            if (openStatementCount != 0) {
+                this->errors.push_back(mcparser::ParserError::closeParenthesisExpected(token));
             }
         }
     }

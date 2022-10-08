@@ -2,6 +2,7 @@
 
 #ifndef LIBS_MCLEXER_INCLUDE_MCLEXER_TOKEN_H_
 #define LIBS_MCLEXER_INCLUDE_MCLEXER_TOKEN_H_
+#define EOF_TOKEN_VALUE ">>EOF<<"
 #include <string>
 
 namespace mclexer {
