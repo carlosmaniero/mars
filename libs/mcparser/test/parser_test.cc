@@ -4,6 +4,7 @@
 
 #include "mclexer/lexer.h"
 #include "mclexer/token.h"
+#include "mcparser/ast.h"
 #include "mcparser/parser.h"
 
 #define EXPECT_EQ_ERRORS(givenError, expectedError) { \
@@ -129,12 +130,16 @@ TEST(Parser, DeclareSomethingAfterStatementEnds) {
 }
 
 TEST(Parser, DefiningPublicIntegers) {
-  std::string source = "(namespace my-ns (def my-number 13)(def vice-number 45))";
+  std::string source =
+    "(namespace my-ns" \
+    " (def public Integer my-number 13) " \
+    " (def private Integer vice-number 45))";
   mclexer::Lexer lexer(&source);
 
   auto tokens = lexer.tokenize();
 
   mcparser::Parser parser;
+
   auto ast = parser.parse(std::move(tokens));
   auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
 
@@ -151,14 +156,20 @@ TEST(Parser, DefiningPublicIntegers) {
     EXPECT_EQ(def->visibility, mcparser::node_visibility_public);
 
     auto value = reinterpret_cast<mcparser::IntegerASTNode*>(def->value.get());
+    auto type = reinterpret_cast<mcparser::NativeIntegerType*>(def->type.get());
+
+    EXPECT_EQ(value->value, 13);
+    EXPECT_NE(type, nullptr);
 
     def = reinterpret_cast<mcparser::DefStatementASTNode*>(astValue->nodes.at(1).get());
 
     EXPECT_EQ(def->identifier, "vice-number");
-    EXPECT_EQ(def->visibility, mcparser::node_visibility_public);
+    EXPECT_EQ(def->visibility, mcparser::node_visibility_private);
 
-    value = reinterpret_cast<mcparser::IntegerASTNode*>(def->value.get());
+    auto value2 = reinterpret_cast<mcparser::IntegerASTNode*>(def->value.get());
+    auto type2 = reinterpret_cast<mcparser::NativeIntegerType*>(def->type.get());
 
-    EXPECT_EQ(value->value, 45);
+    EXPECT_EQ(value2->value, 45);
+    EXPECT_NE(type2, nullptr);
   }
 }

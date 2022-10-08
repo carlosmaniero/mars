@@ -1,7 +1,10 @@
 // Copyright 2022 Maniero
 
-#include "mcparser/parser.h"
+#include <iostream>
+#include <memory>
 #include <string>
+#include "mcparser/ast.h"
+#include "mcparser/parser.h"
 
 MAKE_ERROR::missingIdentifier(mclexer::Token token) {
     return mcparser::ParserError(token.location, "missing identifier: you must provide an identifier.");
@@ -41,6 +44,14 @@ std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parse(
     return this->parseNamespace(tokens.get());
 }
 
+mcparser::NodeVisibility mcparser::Parser::parseVisibilityNode(mclexer::Token* token) {
+    if (token->value == "public") {
+        return node_visibility_public;
+    }
+
+    return node_visibility_private;
+}
+
 mclexer::Token mcparser::Parser::eatNextToken(std::vector<mclexer::Token>* tokens) {
     return tokens->at(tokenIndex++);
 }
@@ -77,6 +88,10 @@ std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parseNode(
 
 std::unique_ptr<mcparser::DefStatementASTNode> mcparser::Parser::parseDef(
     std::vector<mclexer::Token>* tokens) {
+
+    auto visibilityToken = this->eatNextToken(tokens);
+    auto typeToken = this->eatNextToken(tokens);
+
     auto identifier = this->eatNextIdentifierToken(tokens);
 
     if (identifier == nullptr) {
@@ -86,7 +101,9 @@ std::unique_ptr<mcparser::DefStatementASTNode> mcparser::Parser::parseDef(
     auto def = std::make_unique<mcparser::DefStatementASTNode>();
 
     def->identifier = identifier->value;
-    def->visibility = mcparser::node_visibility_public;
+
+    def->visibility = this->parseVisibilityNode(&visibilityToken);
+    def->type = std::make_shared<mcparser::NativeIntegerType>();
     def->value = this->parseNode(tokens);
 
     return def;
