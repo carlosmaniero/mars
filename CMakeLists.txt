@@ -17,35 +17,11 @@ set(MARS_LIBRARIES
     mcllvm
 )
 
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG release-1.12.1
-)
-
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
 # set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # does not produce the json file
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
-
-FetchContent_MakeAvailable(googletest)
-
-enable_testing()
-
-add_executable(
-  hello_test
-  hello_test.cc
-)
-
-target_link_libraries(
-  hello_test
-  GTest::gtest_main
-)
-
-include(GoogleTest)
-gtest_discover_tests(hello_test)
 
 foreach(LIBRARY ${MARS_LIBRARIES})
     add_subdirectory("${MARS_LIBRARIES_DIR}/${LIBRARY}")
