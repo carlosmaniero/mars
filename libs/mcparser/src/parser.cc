@@ -78,7 +78,7 @@ std::pair<mcparser::NodeVisibility, bool> mcparser::Parser::parseVisibilityNode(
 }
 
 mclexer::Token mcparser::Parser::eatNextToken(std::vector<mclexer::Token>* tokens) {
-    return tokens->at(tokenIndex++);
+    return tokens->at(currentTokenIndex++);
 }
 
 std::unique_ptr<mclexer::Token> mcparser::Parser::eatNextIdentifierToken(std::vector<mclexer::Token>* tokens) {
@@ -120,7 +120,7 @@ std::unique_ptr<mcparser::ReferenceIdentifier> mcparser::Parser::parseReference(
 
 std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parseNode(
     std::vector<mclexer::Token>* tokens) {
-    auto token = tokens->at(tokenIndex);
+    auto token = tokens->at(currentTokenIndex);
 
     if (token.kind == mclexer::token_number) {
         return this->parseInteger(tokens);
@@ -228,7 +228,7 @@ std::unique_ptr<mcparser::NamespaceASTNode> mcparser::Parser::parseNamespace(
     auto nodes = std::vector<std::shared_ptr<mcparser::ASTNode>>();
 
     int openStatementCount = 1;
-    while (this->tokenIndex < tokens->size()) {
+    while (this->currentTokenIndex < tokens->size()) {
         auto token = this->eatNextToken(tokens);
 
         if (token.value == "(") {

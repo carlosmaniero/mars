@@ -35,7 +35,7 @@ class Parser {
      std::vector<ParserError> getErrors();
 
  private:
-     int tokenIndex = 0;
+     int currentTokenIndex = 0;
      std::vector<ParserError> errors;
      mclexer::Token eatNextToken(std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mclexer::Token> eatNextIdentifierToken(std::vector<mclexer::Token>* tokens);
