@@ -255,7 +255,7 @@ TEST(Parser, DefiningAConstantFunction) {
 
     auto fun = reinterpret_cast<mcparser::FunctionStatementASTNode*>(astValue->nodes.at(0).get());
     auto returnType = reinterpret_cast<mcparser::NativeIntegerType*>(fun->returnType.get());
-    auto body = reinterpret_cast<mcparser::ReferenceIdentifier*>(fun->body.get());
+    auto body = dynamic_cast<mcparser::ReferenceIdentifier*>(fun->body.get());
 
     EXPECT_EQ(fun->identifier, "id");
     EXPECT_EQ(fun->visibility, mcparser::node_visibility_public);
@@ -266,5 +266,57 @@ TEST(Parser, DefiningAConstantFunction) {
     EXPECT_INSTANCE_OF(fun->body.get(), mcparser::ReferenceIdentifier);
     EXPECT_EQ(*body->identifier, "number");
     EXPECT_INSTANCE_OF(body->type.get(), mcparser::NativeIntegerType);
+  }
+}
+
+TEST(Parser, DefiningSumFunction) {
+  std::string source =
+    "(namespace my-ns \n"\
+    "  (fun public sum (Integer a Integer b) Integer" \
+    "    (+ a b)))";
+  mclexer::Lexer lexer(&source);
+
+  auto tokens = lexer.tokenize();
+
+  mcparser::Parser parser;
+
+  auto ast = parser.parse(std::move(tokens));
+  auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
+
+  auto errors = parser.getErrors();
+
+  EXPECT_NO_ERRORS(errors);
+
+  EXPECT_NE(ast, nullptr);
+
+  if (ast != nullptr) {
+    EXPECT_EQ(astValue->nodes.size(), 1);
+
+    auto fun = reinterpret_cast<mcparser::FunctionStatementASTNode*>(astValue->nodes.at(0).get());
+
+    // Validate metadata
+    EXPECT_EQ(fun->identifier, "sum");
+    EXPECT_EQ(fun->visibility, mcparser::node_visibility_public);
+    EXPECT_INSTANCE_OF(fun->returnType.get(), mcparser::NativeIntegerType);
+
+    // Validate parameters
+    EXPECT_EQ(fun->parameters->size(), 2);
+
+    EXPECT_EQ(*fun->parameters->at(0)->identifier, "a");
+    EXPECT_EQ(*fun->parameters->at(1)->identifier, "b");
+
+    EXPECT_INSTANCE_OF(fun->parameters->at(0)->type.get(), mcparser::NativeIntegerType);
+    EXPECT_INSTANCE_OF(fun->parameters->at(1)->type.get(), mcparser::NativeIntegerType);
+
+    // Validate Body
+    EXPECT_INSTANCE_OF(fun->body.get(), mcparser::NativeFunctionCall);
+    auto body = reinterpret_cast<mcparser::NativeFunctionCall*>(fun->body.get());
+
+    EXPECT_EQ(*body->functionName, "+");
+    EXPECT_INSTANCE_OF(body->returnType.get(), mcparser::NativeIntegerType);
+
+    EXPECT_EQ(body->arguments->size(), 2);
+    EXPECT_INSTANCE_OF(body->arguments->at(0)->value.get(), mcparser::ReferenceIdentifier);
+    EXPECT_INSTANCE_OF(body->arguments->at(1)->value.get(), mcparser::ReferenceIdentifier);
   }
 }

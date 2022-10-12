@@ -67,5 +67,19 @@ class FunctionStatementASTNode : public ASTNode {
      std::shared_ptr<Parameters> parameters;
      std::shared_ptr<ASTNode> body;
 };
+
+class FunctionArgument : public ASTNode {
+ public:
+     std::shared_ptr<ASTNode> value;
+};
+
+typedef std::vector<std::shared_ptr<FunctionArgument>> FunctionArguments;
+
+class NativeFunctionCall : public ASTNode {
+ public:
+     std::shared_ptr<std::string> functionName;
+     std::shared_ptr<FunctionArguments> arguments;
+     std::shared_ptr<Type> returnType;
+};
 }  // namespace mcparser
 #endif  // LIBS_MCPARSER_INCLUDE_MCPARSER_AST_H_

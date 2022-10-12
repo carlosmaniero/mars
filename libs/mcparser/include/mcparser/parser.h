@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 #include "mclexer/token.h"
-#include "mcparser/context.h"
+#include "mcparser/ast.h"
 
 namespace mcparser {
 class ParserError {
@@ -52,6 +52,8 @@ class Parser {
      std::unique_ptr<mcparser::IntegerASTNode> parseInteger(
          std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mcparser::ReferenceIdentifier> parseReference(
+         std::vector<mclexer::Token>* tokens);
+     std::unique_ptr<mcparser::NativeFunctionCall> parseFunctionCall(
          std::vector<mclexer::Token>* tokens);
 };
 }  // namespace mcparser

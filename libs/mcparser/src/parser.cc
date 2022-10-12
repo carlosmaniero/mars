@@ -118,6 +118,37 @@ std::unique_ptr<mcparser::ReferenceIdentifier> mcparser::Parser::parseReference(
     return referenceIdentifier;
 }
 
+std::unique_ptr<mcparser::NativeFunctionCall> mcparser::Parser::parseFunctionCall(
+    std::vector<mclexer::Token>* tokens) {
+
+    if (!this->eatOpenParenthesis(tokens)) {
+        return nullptr;
+    }
+
+    auto functionNameToken = this->eatNextToken(tokens);
+
+    auto functionCall = std::make_unique<mcparser::NativeFunctionCall>();
+
+    functionCall->functionName = std::make_shared<std::string>(functionNameToken.value);
+    functionCall->arguments = std::make_shared<mcparser::FunctionArguments>();
+
+    // TODO(maniero): Hard coded
+    functionCall->returnType = std::make_unique<mcparser::NativeIntegerType>();
+
+    // TODO(maniero): Check if there is no tokens left
+    while (tokens->at(currentTokenIndex).value != ")") {
+        auto argument = std::make_shared<mcparser::FunctionArgument>();
+        argument->value = this->parseNode(tokens);
+
+        functionCall->arguments->push_back(argument);
+    }
+
+    // Eat )
+    this->eatNextToken(tokens);
+
+    return functionCall;
+}
+
 std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parseNode(
     std::vector<mclexer::Token>* tokens) {
     auto token = tokens->at(currentTokenIndex);
@@ -126,8 +157,11 @@ std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parseNode(
         return this->parseInteger(tokens);
     } else if (token.kind == mclexer::token_identifier) {
         return this->parseReference(tokens);
+    } else if (token.kind == mclexer::token_symbol && token.value == "(") {
+        return this->parseFunctionCall(tokens);
     }
 
+    // TODO(maniero): Validate empty block
     return nullptr;
 }
 
@@ -177,6 +211,8 @@ std::unique_ptr<mcparser::FunctionStatementASTNode> mcparser::Parser::parseFunct
         return nullptr;
     }
 
+    fun->identifier = functionName->value;
+
     auto body = std::make_shared<mcparser::IntegerASTNode>();
     auto parameters = std::make_shared<mcparser::Parameters>();
 
@@ -184,30 +220,35 @@ std::unique_ptr<mcparser::FunctionStatementASTNode> mcparser::Parser::parseFunct
         return nullptr;
     }
 
-    // Eating parameters
-    auto parameter = std::make_shared<mcparser::Parameter>();
+    // TODO(maniero): Check if there is no tokens left
+    while (tokens->at(currentTokenIndex).value != ")") {
+        // Eating parameters
+        auto parameter = std::make_shared<mcparser::Parameter>();
 
-    auto paramTypeToken = this->eatNextIdentifierToken(tokens);
-    auto paramIdentifierToken = this->eatNextIdentifierToken(tokens);
+        auto paramTypeToken = this->eatNextIdentifierToken(tokens);
+
+        auto paramIdentifierToken = this->eatNextIdentifierToken(tokens);
+
+        // TODO(carlosmaniero): Hard coded
+        parameter->type = std::make_unique<mcparser::NativeIntegerType>();
+        parameter->identifier = std::make_shared<std::string>(paramIdentifierToken->value);
+
+        parameters->push_back(parameter);
+    }
 
     // Eating close parenthesis
     this->eatNextToken(tokens);
 
-    // TODO(carlosmaniero): Eating return type
+    fun->parameters = parameters;
+
+    // Eat return type
     this->eatNextToken(tokens);
+    // TODO(carlosmaniero): Hard coded retrun type
+    fun->returnType = std::make_unique<mcparser::NativeIntegerType>();
 
-    // TODO(carlosmaniero): Hard coded
-    parameter->identifier = std::make_shared<std::string>(paramIdentifierToken->value);
-    parameter->type = std::make_unique<mcparser::NativeIntegerType>();
-
-    parameters->push_back(parameter);
-
-    fun->identifier = functionName->value;
     fun->visibility = parsedVisibility.first;
     fun->body = this->parseNode(tokens);
-    fun->parameters = parameters;
-    // TODO(carlosmaniero): Hard coded
-    fun->returnType = std::make_unique<mcparser::NativeIntegerType>();
+
 
     return fun;
 }
