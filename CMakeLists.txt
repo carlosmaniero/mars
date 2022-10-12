@@ -14,6 +14,7 @@ set(MARS_LIBRARIES_DIR
 set(MARS_LIBRARIES
     mclexer
     mcparser
+    mcllvm
 )
 
 include(FetchContent)
