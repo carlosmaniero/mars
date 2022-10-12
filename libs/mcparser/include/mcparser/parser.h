@@ -32,21 +32,26 @@ class Parser {
  public:
      std::unique_ptr<mcparser::ASTNode> parse(
          std::unique_ptr<std::vector<mclexer::Token>> tokens);
-
      std::vector<ParserError> getErrors();
+
  private:
      int tokenIndex = 0;
      std::vector<ParserError> errors;
      mclexer::Token eatNextToken(std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mclexer::Token> eatNextIdentifierToken(std::vector<mclexer::Token>* tokens);
+     bool eatOpenParenthesis(std::vector<mclexer::Token>* tokens);
      std::pair<mcparser::NodeVisibility, bool> parseVisibilityNode(mclexer::Token* token);
      std::unique_ptr<mcparser::NamespaceASTNode> parseNamespace(
          std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mcparser::DefStatementASTNode> parseDef(
          std::vector<mclexer::Token>* tokens);
+     std::unique_ptr<mcparser::FunctionStatementASTNode> parseFunction(
+         std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mcparser::ASTNode> parseNode(
          std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mcparser::IntegerASTNode> parseInteger(
+         std::vector<mclexer::Token>* tokens);
+     std::unique_ptr<mcparser::ReferenceIdentifier> parseReference(
          std::vector<mclexer::Token>* tokens);
 };
 }  // namespace mcparser

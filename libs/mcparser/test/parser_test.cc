@@ -13,6 +13,17 @@
   EXPECT_EQ(givenError.location.line, expectedError.location.line);\
 }
 
+#define EXPECT_NO_ERRORS(errors) { \
+  for (int i=0; i < errors.size(); i++) \
+    std::cout << "ERROR: " << errors.at(i).message << "\n"; \
+  EXPECT_EQ(parser.getErrors().size(), 0);\
+}
+
+#define EXPECT_INSTANCE_OF(VALUE, CLS) { \
+    auto casted = dynamic_cast<CLS*>(VALUE); \
+    EXPECT_NE(casted, nullptr); \
+}
+
 TEST(Parser, EmptySource) {
   auto tokens = std::make_unique<std::vector<mclexer::Token>>();
 
@@ -20,8 +31,8 @@ TEST(Parser, EmptySource) {
 
   auto ast = parser.parse(std::move(tokens));
 
+  EXPECT_NO_ERRORS(parser.getErrors());
   EXPECT_EQ(ast, nullptr);
-  EXPECT_EQ(parser.getErrors().size(), 0);
 }
 
 TEST(Parser, DeclaringNamespaces) {
@@ -42,6 +53,28 @@ TEST(Parser, DeclaringNamespaces) {
     EXPECT_EQ(astValue->nodes.size(), 0);
     EXPECT_EQ(parser.getErrors().size(), 0);
   }
+}
+
+TEST(Parser, MissingNamespaceCloseParen) {
+  std::string source =
+    "(namespace my-ns";
+  mclexer::Lexer lexer(&source);
+
+  auto tokens = lexer.tokenize();
+
+  mcparser::Parser parser;
+
+  auto ast = parser.parse(std::move(tokens));
+  auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
+
+  auto errors = parser.getErrors();
+
+  EXPECT_EQ(errors.size(), 1);
+
+  auto expectedError = mcparser::ParserError::closeParenthesisExpected(
+    mclexer::Token(mclexer::TokenLocation(1, 17), mclexer::token_symbol, EOF_TOKEN_VALUE));
+
+  EXPECT_EQ_ERRORS(errors.at(0), expectedError);
 }
 
 TEST(Parser, DeclaringNamespacesWithoutAnIndentifier) {
@@ -197,9 +230,11 @@ TEST(Parser, DefiningWithInvalidVisibility) {
   EXPECT_EQ_ERRORS(errors.at(0), expectedError);
 }
 
-TEST(Parser, MissingNamespaceCloseParen) {
+TEST(Parser, DefiningAConstantFunction) {
   std::string source =
-    "(namespace my-ns";
+    "(namespace my-ns \n"\
+    "  (fun public id (Integer number) Integer" \
+    "    number))";
   mclexer::Lexer lexer(&source);
 
   auto tokens = lexer.tokenize();
@@ -211,10 +246,25 @@ TEST(Parser, MissingNamespaceCloseParen) {
 
   auto errors = parser.getErrors();
 
-  EXPECT_EQ(errors.size(), 1);
+  EXPECT_NO_ERRORS(errors);
 
-  auto expectedError = mcparser::ParserError::closeParenthesisExpected(
-    mclexer::Token(mclexer::TokenLocation(1, 17), mclexer::token_symbol, EOF_TOKEN_VALUE));
+  EXPECT_NE(ast, nullptr);
 
-  EXPECT_EQ_ERRORS(errors.at(0), expectedError);
+  if (ast != nullptr) {
+    EXPECT_EQ(astValue->nodes.size(), 1);
+
+    auto fun = reinterpret_cast<mcparser::FunctionStatementASTNode*>(astValue->nodes.at(0).get());
+    auto returnType = reinterpret_cast<mcparser::NativeIntegerType*>(fun->returnType.get());
+    auto body = reinterpret_cast<mcparser::ReferenceIdentifier*>(fun->body.get());
+
+    EXPECT_EQ(fun->identifier, "id");
+    EXPECT_EQ(fun->visibility, mcparser::node_visibility_public);
+    EXPECT_EQ(fun->parameters->size(), 1);
+    EXPECT_EQ(*fun->parameters->at(0)->identifier, "number");
+    EXPECT_INSTANCE_OF(fun->parameters->at(0)->type.get(), mcparser::NativeIntegerType);
+    EXPECT_NE(returnType, nullptr);
+    EXPECT_INSTANCE_OF(fun->body.get(), mcparser::ReferenceIdentifier);
+    EXPECT_EQ(*body->identifier, "number");
+    EXPECT_INSTANCE_OF(body->type.get(), mcparser::NativeIntegerType);
+  }
 }

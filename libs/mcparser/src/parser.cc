@@ -1,5 +1,7 @@
 // Copyright 2022 Maniero
 
+#include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -9,7 +11,8 @@
 #include "mcparser/parser.h"
 
 MAKE_ERROR::missingIdentifier(mclexer::Token token) {
-    return mcparser::ParserError(token.location, "missing identifier: you must provide an identifier.");
+  return mcparser::ParserError(
+      token.location, "missing identifier: you must provide an identifier.");
 }
 
 MAKE_ERROR::openParenthesisExpected(mclexer::Token token) {
@@ -34,6 +37,18 @@ MAKE_ERROR::invalidVisibility(mclexer::Token token) {
         "invalid visibility. Expected (public, private). Found: \"" + token.value + "\" token");
 }
 
+bool mcparser::Parser::eatOpenParenthesis(std::vector<mclexer::Token>* tokens) {
+    auto token = this->eatNextToken(tokens);
+
+    if (token.kind != mclexer::token_symbol && token.value != "(") {
+        this->errors.push_back(
+            mcparser::ParserError::openParenthesisExpected(
+                token));
+        return false;
+    }
+    return true;
+}
+
 std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parse(
     std::unique_ptr<std::vector<mclexer::Token>> tokens
 ) {
@@ -41,12 +56,7 @@ std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parse(
         return nullptr;
     }
 
-    auto initialToken = this->eatNextToken(tokens.get());
-
-    if (initialToken.kind != mclexer::token_symbol && initialToken.value != "(") {
-        this->errors.push_back(
-            mcparser::ParserError::openParenthesisExpected(
-                initialToken));
+    if (!this->eatOpenParenthesis(tokens.get())) {
         return nullptr;
     }
 
@@ -63,6 +73,7 @@ std::pair<mcparser::NodeVisibility, bool> mcparser::Parser::parseVisibilityNode(
         return std::make_pair(node_visibility_private, true);
     }
 
+    this->errors.push_back(mcparser::ParserError::invalidVisibility(*token));
     return std::make_pair(node_visibility_public, false);
 }
 
@@ -90,14 +101,34 @@ std::unique_ptr<mcparser::IntegerASTNode> mcparser::Parser::parseInteger(
     std::vector<mclexer::Token>* tokens) {
     auto token = this->eatNextToken(tokens);
     auto intAst = std::make_unique<mcparser::IntegerASTNode>();
+    // TODO(carlosmaniero): Handle invalid integer
     intAst->value = std::stoi(token.value);
     return std::move(intAst);
 }
 
+std::unique_ptr<mcparser::ReferenceIdentifier> mcparser::Parser::parseReference(
+    std::vector<mclexer::Token>* tokens) {
+    auto token = this->eatNextToken(tokens);
+    auto referenceIdentifier = std::make_unique<mcparser::ReferenceIdentifier>();
+
+    referenceIdentifier->identifier = std::make_shared<std::string>(token.value);
+    // TODO(carlosmaniero): parse the type
+    referenceIdentifier->type = std::make_shared<mcparser::NativeIntegerType>();
+
+    return referenceIdentifier;
+}
+
 std::unique_ptr<mcparser::ASTNode> mcparser::Parser::parseNode(
     std::vector<mclexer::Token>* tokens) {
+    auto token = tokens->at(tokenIndex);
 
-    return this->parseInteger(tokens);
+    if (token.kind == mclexer::token_number) {
+        return this->parseInteger(tokens);
+    } else if (token.kind == mclexer::token_identifier) {
+        return this->parseReference(tokens);
+    }
+
+    return nullptr;
 }
 
 std::unique_ptr<mcparser::DefStatementASTNode> mcparser::Parser::parseDef(
@@ -119,7 +150,6 @@ std::unique_ptr<mcparser::DefStatementASTNode> mcparser::Parser::parseDef(
     auto parsedVisibility = this->parseVisibilityNode(&visibilityToken);
 
     if (!parsedVisibility.second) {
-        this->errors.push_back(mcparser::ParserError::invalidVisibility(visibilityToken));
         return nullptr;
     }
 
@@ -128,6 +158,58 @@ std::unique_ptr<mcparser::DefStatementASTNode> mcparser::Parser::parseDef(
     def->value = this->parseNode(tokens);
 
     return def;
+}
+
+std::unique_ptr<mcparser::FunctionStatementASTNode> mcparser::Parser::parseFunction(
+    std::vector<mclexer::Token>* tokens) {
+    auto fun = std::make_unique<mcparser::FunctionStatementASTNode>();
+
+    auto visibilityToken = this->eatNextToken(tokens);
+    auto parsedVisibility = this->parseVisibilityNode(&visibilityToken);
+
+    if (!parsedVisibility.second) {
+        return nullptr;
+    }
+
+    auto functionName = this->eatNextIdentifierToken(tokens);
+
+    if (functionName == nullptr) {
+        return nullptr;
+    }
+
+    auto body = std::make_shared<mcparser::IntegerASTNode>();
+    auto parameters = std::make_shared<mcparser::Parameters>();
+
+    if (!this->eatOpenParenthesis(tokens)) {
+        return nullptr;
+    }
+
+    // Eating parameters
+    auto parameter = std::make_shared<mcparser::Parameter>();
+
+    auto paramTypeToken = this->eatNextIdentifierToken(tokens);
+    auto paramIdentifierToken = this->eatNextIdentifierToken(tokens);
+
+    // Eating close parenthesis
+    this->eatNextToken(tokens);
+
+    // TODO(carlosmaniero): Eating return type
+    this->eatNextToken(tokens);
+
+    // TODO(carlosmaniero): Hard coded
+    parameter->identifier = std::make_shared<std::string>(paramIdentifierToken->value);
+    parameter->type = std::make_unique<mcparser::NativeIntegerType>();
+
+    parameters->push_back(parameter);
+
+    fun->identifier = functionName->value;
+    fun->visibility = parsedVisibility.first;
+    fun->body = this->parseNode(tokens);
+    fun->parameters = parameters;
+    // TODO(carlosmaniero): Hard coded
+    fun->returnType = std::make_unique<mcparser::NativeIntegerType>();
+
+    return fun;
 }
 
 std::unique_ptr<mcparser::NamespaceASTNode> mcparser::Parser::parseNamespace(
@@ -156,6 +238,10 @@ std::unique_ptr<mcparser::NamespaceASTNode> mcparser::Parser::parseNamespace(
             if (token.value == "def") {
                 auto def = this->parseDef(tokens);
                 nodes.push_back(std::move(def));
+            }
+
+            if (token.value == "fun") {
+                nodes.push_back(std::move(this->parseFunction(tokens)));
             }
         }
 
