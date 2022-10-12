@@ -34,15 +34,19 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
 
 add_executable(${MARS_PROJECT_NAME} ${MARS_SOURCE})
 
+
+set(MARS_LIBRARIES
+    mclexer
+    mcparser
+    mcllvm
+)
+
 foreach(LIBRARY ${MARS_LIBRARIES})
     add_subdirectory("${MARS_LIBRARIES_DIR}/${LIBRARY}")
 endforeach(LIBRARY)
 
-set(MARS_LIBRARIES
-    #mclexer
-    #mcparser
-    #mcllvm
-    spdlog::spdlog
-)
+foreach(LIBRARY ${MARS_LIBRARIES})
+    target_link_libraries(${MARS_PROJECT_NAME} ${LIBRARY})
+endforeach(LIBRARY)
 
-target_link_libraries(${MARS_PROJECT_NAME} ${MARS_LIBRARIES})
+target_link_libraries(${MARS_PROJECT_NAME} spdlog::spdlog)
