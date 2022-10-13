@@ -34,7 +34,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
 
 add_executable(${MARS_PROJECT_NAME} ${MARS_SOURCE})
 
-
 set(MARS_LIBRARIES
     mclexer
     mcparser

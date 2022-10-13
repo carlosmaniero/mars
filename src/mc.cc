@@ -1,9 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include "mclexer/lexer.h"
+#include "mcllvm/context.h"
 #include "mcparser/parser.h"
 #include "spdlog/spdlog.h"
 
@@ -32,7 +34,7 @@ int main(int argc, char **argv) {
     mcparser::Parser parser;
 
     auto tokens = lexer.tokenize();
-    parser.parse(std::move(tokens));
+    auto ast = parser.parse(std::move(tokens));
 
     if (parser.getErrors().size() > 0) {
         for (int i = 0; i < parser.getErrors().size(); i++) {
@@ -44,4 +46,10 @@ int main(int argc, char **argv) {
         }
         return 1;
     }
+
+    mcllvm::LLVMContext context;
+    ast->eval(&context);
+
+    spdlog::info("Finished!");
+    return 0;
 }

@@ -26,6 +26,16 @@ set(LIBRARY_SOURCE
 # GoogleTest requires at least C++14
 set(CMAKE_CXX_STANDARD 14)
 
+include(FetchContent)
+
+FetchContent_Declare(
+  spdlog
+  GIT_REPOSITORY https://github.com/gabime/spdlog.git
+  GIT_TAG v1.10.0
+)
+
+FetchContent_MakeAvailable(spdlog)
+
 project(${PROJECT_NAME})
 
 add_library(${LIBRARY_NAME} STATIC
@@ -49,5 +59,7 @@ target_link_libraries(
     ${LIBRARY_NAME}
     mclexer
 )
+
+target_link_libraries(${LIBRARY_NAME} spdlog::spdlog)
 
 add_subdirectory(test)
