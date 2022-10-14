@@ -8,11 +8,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v1.5.5
       with:
         version: "13.0.1"
-    - uses: actions/checkout@v2
     - name: building 🏗️
       run: ./setup.sh
       env:
