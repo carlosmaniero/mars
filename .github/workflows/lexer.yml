@@ -12,7 +12,7 @@ jobs:
       uses: KyleMayes/install-llvm-action@v1
       with:
         force-version: true
-        version: "15.0.1"
+        version: "15.0"
     - uses: actions/checkout@v2
     - name: building 🏗️
       run: sh setup.sh
