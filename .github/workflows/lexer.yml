@@ -16,8 +16,8 @@ jobs:
     - name: building 🏗️
       run: ./setup.sh
       env:
-        CC: $LLVM_PATH/bin/clang
-        CXX: $LLVM_PATH/bin/clang++
+        CC: '${{ env.LLVM_PATH }}/bin/clang'
+        CXX: '${{ env.LLVM_PATH }}/bin/clang++'
     - name: testing 🧪
       run: sh test.sh --skip-build
     - name: linting 💅
