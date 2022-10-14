@@ -41,9 +41,7 @@ bool mcparser::Parser::eatOpenParenthesis(std::vector<mclexer::Token>* tokens) {
     auto token = this->eatNextToken(tokens);
 
     if (token.kind != mclexer::token_symbol && token.value != "(") {
-        this->errors.push_back(
-            mcparser::ParserError::openParenthesisExpected(
-                token));
+        this->errors.push_back(mcparser::ParserError::openParenthesisExpected(token));
         return false;
     }
     return true;
