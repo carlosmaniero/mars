@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Install LLVM and Clang
-      uses: KyleMayes/install-llvm-action
+      uses: KyleMayes/install-llvm-action@v1.5.5
       with:
         version: "15.0.1"
     - uses: actions/checkout@v2
