@@ -16,6 +16,11 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Verifier.h"
+#if __has_include( "llvm/MC/TargetRegistry.h" )
+#   include "llvm/MC/TargetRegistry.h"
+#else
+#   include "llvm/Support/TargetRegistry.h"
+#endif
 #include "llvm/MC/TargetRegistry.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Host.h"
