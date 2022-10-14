@@ -8,8 +8,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Install xmllint
-      run: sudo apt-get update && sudo apt-get install -y llvm-15
+    - name: Install LLVM and Clang
+      uses: KyleMayes/install-llvm-action
+      with:
+        version: "15.0.1"
     - uses: actions/checkout@v2
     - name: building 🏗️
       run: sh setup.sh
