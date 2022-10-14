@@ -14,7 +14,10 @@ jobs:
         version: "13.0.1"
     - uses: actions/checkout@v2
     - name: building 🏗️
-      run: ls $LLVM_PATH && ls $LLVM_PATH/bin && sh setup.sh
+      run: ./setup.sh
+      env:
+        CC: $LLVM_PATH/bin/clang
+        CXX: $LLVM_PATH/bin/clang++
     - name: testing 🧪
       run: sh test.sh --skip-build
     - name: linting 💅
