@@ -23,6 +23,8 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Target/TargetOptions.h"
+#include "llvm/ADT/APInt.h"
+#include <string>
 
 
 void mcllvm::LLVMContext::evalNamespace(mcparser::NamespaceASTNode* namespaceAST) {
@@ -91,12 +93,12 @@ void mcllvm::LLVMContext::evalFunction(mcparser::FunctionStatementASTNode* funct
 
     spdlog::info("LLVM Creating parameters");
     for (int i = 0; i < functionAst->parameters->size(); i++) {
-        parameters.at(i) = llvm::Type::getDoubleTy(*llvmContext);
+        parameters.at(i) = llvm::Type::getInt64Ty(*llvmContext);
     }
 
     // TODO(carlosmaniero): Hard coded int
     spdlog::info("LLVM Defining return type");
-    llvm::Type* returnType = llvm::Type::getDoubleTy(*llvmContext);
+    llvm::Type* returnType = llvm::Type::getInt64Ty(*llvmContext);
 
     llvm::FunctionType* functionType = llvm::FunctionType::get(returnType, parameters, false);
 
@@ -130,7 +132,7 @@ void mcllvm::LLVMContext::evalFunction(mcparser::FunctionStatementASTNode* funct
 
         // Create an alloca for this variable.
         llvm::AllocaInst* parameterAllocation = tempBuilder.CreateAlloca(
-            llvm::Type::getDoubleTy(*llvmContext), nullptr, arg.getName());
+            llvm::Type::getInt64Ty(*llvmContext), nullptr, arg.getName());
 
         // Store the initial value into the alloca.
         llvmBuilder->CreateStore(&arg, parameterAllocation);
@@ -172,7 +174,7 @@ void mcllvm::LLVMContext::evalNativeFunctionCall(mcparser::NativeFunctionCall* f
     this->evalValueFrom(functionAst->arguments->at(1)->value.get());
     llvm::Value* second = this->latestEvaluatedValue;
 
-    this->latestEvaluatedValue = llvmBuilder->CreateFAdd(first, second, "addtmp");
+    this->latestEvaluatedValue = llvmBuilder->CreateAdd(first, second, "addtmp");
 }
 
 void mcllvm::LLVMContext::evalValueFrom(mcparser::ASTNode* node) {
@@ -185,5 +187,12 @@ void mcllvm::LLVMContext::evalReferenceIdentifier(mcparser::ReferenceIdentifier*
     auto myReference = scopeValues.at(*reference->identifier);
 
     this->latestEvaluatedValue = llvmBuilder->CreateLoad(
-        llvm::Type::getDoubleTy(*llvmContext), myReference, *reference->identifier);
+        llvm::Type::getInt64Ty(*llvmContext), myReference, *reference->identifier);
+}
+
+void mcllvm::LLVMContext::evalInteger(mcparser::IntegerASTNode* integer) {
+    spdlog::info("LLVM evaluating constant integer: " + std::to_string(integer->value));
+    llvm::Type *i64_type = llvm::IntegerType::getInt64Ty(*llvmContext);
+
+    this->latestEvaluatedValue = llvm::ConstantInt::get(i64_type, integer->value, true);
 }

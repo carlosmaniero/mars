@@ -44,6 +44,8 @@ class NamespaceASTNode : public ASTNode {
 class IntegerASTNode : public ASTNode {
  public:
      int value;
+
+     virtual void eval(mcparser::IParserContext* context);
 };
 
 class Parameter : public ASTNode {
@@ -106,6 +108,8 @@ class IParserContext {
     virtual void evalNativeFunctionCall(mcparser::NativeFunctionCall* functionAst) {
     }
     virtual void evalReferenceIdentifier(mcparser::ReferenceIdentifier* reference) {
+    }
+    virtual void evalInteger(mcparser::IntegerASTNode* reference) {
     }
     virtual ~IParserContext() = default;
 };

@@ -21,3 +21,8 @@ void mcparser::ReferenceIdentifier::eval(mcparser::IParserContext* context) {
     spdlog::info("start reference evaluation");
     context->evalReferenceIdentifier(this);
 }
+
+void mcparser::IntegerASTNode::eval(mcparser::IParserContext* context) {
+    spdlog::info("start constant integer evaluation");
+    context->evalInteger(this);
+}

@@ -1,9 +1,9 @@
 #include <iostream>
 
 extern "C" {
-    double sumTwoNumbers(double, double);
+    int sumTwoNumbers(int, int);
 }
 
 int main() {
-    std::cout << "the sum of 3 and 4 " << sumTwoNumbers(3, 4) << std::endl;
+    std::cout << "the sum of 3 and 4 is: " << sumTwoNumbers(3, 4) << std::endl;
 }
