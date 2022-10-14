@@ -11,7 +11,7 @@ jobs:
     - name: Install LLVM and Clang
       uses: KyleMayes/install-llvm-action@v1.5.5
       with:
-        version: "15.0.1"
+        version: "13.0.1"
     - uses: actions/checkout@v2
     - name: building 🏗️
       run: sh setup.sh
