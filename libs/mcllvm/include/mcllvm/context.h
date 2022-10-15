@@ -27,6 +27,7 @@ class LLVMContext : public mcparser::IParserContext {
     virtual void evalNamespace(mcparser::NamespaceASTNode* namespaceAST);
     virtual void evalFunction(mcparser::FunctionStatementASTNode* functionAst);
     virtual void evalNativeFunctionCall(mcparser::NativeFunctionCall* functionAst);
+    virtual void evalUserDefinedFunctionCall(mcparser::UserDefinedFunctionCall* functionAst);
     virtual void evalReferenceIdentifier(mcparser::ReferenceIdentifier* reference);
     virtual void evalInteger(mcparser::IntegerASTNode* integer);
  private:

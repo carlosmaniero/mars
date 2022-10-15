@@ -106,6 +106,8 @@ class NativeFunctionCall : public IFunctionCall {
 };
 
 class UserDefinedFunctionCall  : public IFunctionCall {
+ public:
+     virtual void eval(mcparser::IParserContext* context);
 };
 
 class IParserContext {
@@ -115,6 +117,8 @@ class IParserContext {
     virtual void evalFunction(mcparser::FunctionStatementASTNode* functionAST) {
     }
     virtual void evalNativeFunctionCall(mcparser::NativeFunctionCall* functionAst) {
+    }
+    virtual void evalUserDefinedFunctionCall(mcparser::UserDefinedFunctionCall* functionAst) {
     }
     virtual void evalReferenceIdentifier(mcparser::ReferenceIdentifier* reference) {
     }

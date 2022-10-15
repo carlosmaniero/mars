@@ -156,8 +156,21 @@ void mcllvm::LLVMContext::evalFunction(mcparser::FunctionStatementASTNode* funct
     }
 }
 
+void mcllvm::LLVMContext::evalUserDefinedFunctionCall(mcparser::UserDefinedFunctionCall* functionAst) {
+    spdlog::info("LLVM evaluating user defined function call of: " + *functionAst->functionName);
+    llvm::Function* llvmFunction = llvmModule->getFunction(*functionAst->functionName);
+
+    std::vector<llvm::Value*> llvmFunctionArguments;
+    for (unsigned i = 0, e = functionAst->arguments->size(); i != e; ++i) {
+        this->evalValueFrom(functionAst->arguments->at(i)->value.get());
+        llvmFunctionArguments.push_back(this->latestEvaluatedValue);
+    }
+
+    this->latestEvaluatedValue = llvmBuilder->CreateCall(llvmFunction, llvmFunctionArguments);
+}
+
 void mcllvm::LLVMContext::evalNativeFunctionCall(mcparser::NativeFunctionCall* functionAst) {
-    spdlog::info("LLVM evaluating function call of: " + *functionAst->functionName);
+    spdlog::info("LLVM evaluating native function call of: " + *functionAst->functionName);
 
     if ("+" != *functionAst->functionName) {
         spdlog::error("Native function not supported: " + *functionAst->functionName);

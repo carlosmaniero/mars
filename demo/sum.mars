@@ -1,3 +1,7 @@
 (namespace sum
-  (fun public sumTwoNumbers (Integer a Integer b) Integer
-    (+ 1 (+ a b))))
+  (fun public add (Integer a Integer b) Integer
+    (+ a b))
+  (fun public inc (Integer a) Integer
+    (add a 1))
+  (fun public entry () Integer
+    (inc 12)))
