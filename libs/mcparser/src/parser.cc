@@ -118,7 +118,7 @@ std::unique_ptr<mcparser::ReferenceIdentifier> mcparser::Parser::parseReference(
     return referenceIdentifier;
 }
 
-std::unique_ptr<mcparser::NativeFunctionCall> mcparser::Parser::parseFunctionCall(
+std::unique_ptr<mcparser::IFunctionCall> mcparser::Parser::parseFunctionCall(
     std::vector<mclexer::Token>* tokens) {
 
     if (!this->eatOpenParenthesis(tokens)) {
@@ -127,7 +127,13 @@ std::unique_ptr<mcparser::NativeFunctionCall> mcparser::Parser::parseFunctionCal
 
     auto functionNameToken = this->eatNextToken(tokens);
 
-    auto functionCall = std::make_unique<mcparser::NativeFunctionCall>();
+    std::unique_ptr<mcparser::IFunctionCall> functionCall;
+
+    if (mcparser::NATIVE_FUNCTION_CALL_NAMES.count(functionNameToken.value)) {
+        functionCall = std::make_unique<mcparser::NativeFunctionCall>();
+    } else {
+        functionCall = std::make_unique<mcparser::UserDefinedFunctionCall>();
+    }
 
     functionCall->functionName = std::make_shared<std::string>(functionNameToken.value);
     functionCall->arguments = std::make_shared<mcparser::FunctionArguments>();

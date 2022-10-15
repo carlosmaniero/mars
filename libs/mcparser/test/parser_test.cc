@@ -21,7 +21,7 @@
 
 #define EXPECT_INSTANCE_OF(VALUE, CLS) { \
     auto casted = dynamic_cast<CLS*>(VALUE); \
-    EXPECT_NE(casted, nullptr); \
+    EXPECT_NE(casted, nullptr) << "ERROR: The given value is not a \"" << #CLS << "\" instance."; \
 }
 
 TEST(Parser, EmptySource) {
@@ -312,11 +312,51 @@ TEST(Parser, DefiningSumFunction) {
     EXPECT_INSTANCE_OF(fun->body.get(), mcparser::NativeFunctionCall);
     auto body = reinterpret_cast<mcparser::NativeFunctionCall*>(fun->body.get());
 
-    EXPECT_EQ(*body->functionName, "+");
     EXPECT_INSTANCE_OF(body->returnType.get(), mcparser::NativeIntegerType);
 
+    EXPECT_EQ(*body->functionName, "+");
     EXPECT_EQ(body->arguments->size(), 2);
     EXPECT_INSTANCE_OF(body->arguments->at(0)->value.get(), mcparser::ReferenceIdentifier);
     EXPECT_INSTANCE_OF(body->arguments->at(1)->value.get(), mcparser::ReferenceIdentifier);
+  }
+}
+
+TEST(Parser, CallingAnUserDefinedFunction) {
+  std::string source =
+    "(namespace my-ns \n" \
+    "  (fun public inc (Integer a) Integer \n" \
+    "    (+ a 1))" \
+    "  (fun public main () Integer \n" \
+    "    (inc 2)))";
+  mclexer::Lexer lexer(&source);
+
+  auto tokens = lexer.tokenize();
+
+  mcparser::Parser parser;
+
+  auto ast = parser.parse(std::move(tokens));
+  auto astValue = reinterpret_cast<mcparser::NamespaceASTNode*>(ast.get());
+
+  auto errors = parser.getErrors();
+
+  EXPECT_NO_ERRORS(errors);
+
+  EXPECT_NE(ast, nullptr);
+
+  if (ast != nullptr) {
+    EXPECT_EQ(astValue->nodes.size(), 2);
+
+    auto fun = reinterpret_cast<mcparser::FunctionStatementASTNode*>(astValue->nodes.at(1).get());
+
+    // Validate metadata
+    EXPECT_EQ(fun->identifier, "main");
+
+    // Validate Body
+    EXPECT_INSTANCE_OF(fun->body.get(), mcparser::UserDefinedFunctionCall);
+    auto body = reinterpret_cast<mcparser::UserDefinedFunctionCall*>(fun->body.get());
+
+    EXPECT_EQ(*body->functionName, "inc");
+    EXPECT_EQ(body->arguments->size(), 1);
+    EXPECT_INSTANCE_OF(body->arguments->at(0)->value.get(), mcparser::IntegerASTNode);
   }
 }

@@ -3,12 +3,15 @@
 #ifndef LIBS_MCPARSER_INCLUDE_MCPARSER_AST_H_
 #define LIBS_MCPARSER_INCLUDE_MCPARSER_AST_H_
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
 #include "spdlog/spdlog.h"
 
 namespace mcparser {
+
+static std::set<std::string> NATIVE_FUNCTION_CALL_NAMES = {"+", "-", "*", "/"};
 
 class IParserContext;
 
@@ -90,13 +93,19 @@ class FunctionArgument : public ASTNode {
 
 typedef std::vector<std::shared_ptr<FunctionArgument>> FunctionArguments;
 
-class NativeFunctionCall : public ASTNode {
+class IFunctionCall : public ASTNode {
  public:
      std::shared_ptr<std::string> functionName;
      std::shared_ptr<FunctionArguments> arguments;
      std::shared_ptr<Type> returnType;
+};
 
+class NativeFunctionCall : public IFunctionCall {
+ public:
      virtual void eval(mcparser::IParserContext* context);
+};
+
+class UserDefinedFunctionCall  : public IFunctionCall {
 };
 
 class IParserContext {

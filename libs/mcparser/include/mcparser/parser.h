@@ -53,7 +53,7 @@ class Parser {
          std::vector<mclexer::Token>* tokens);
      std::unique_ptr<mcparser::ReferenceIdentifier> parseReference(
          std::vector<mclexer::Token>* tokens);
-     std::unique_ptr<mcparser::NativeFunctionCall> parseFunctionCall(
+     std::unique_ptr<mcparser::IFunctionCall> parseFunctionCall(
          std::vector<mclexer::Token>* tokens);
 };
 }  // namespace mcparser
