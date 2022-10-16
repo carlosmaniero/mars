@@ -10,7 +10,7 @@ compiler_path = os.path.join(project_dir, "bin", "mc")
 def compile(the_file):
     proc = subprocess.run(
         [
-            "sh",
+            "bash",
             compiler_path,
             os.path.join(test_dir, the_file + ".mars"),
             os.path.join(test_dir, the_file)
