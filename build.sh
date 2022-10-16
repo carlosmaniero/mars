@@ -23,3 +23,4 @@ logStep "Building..."
 cmake --build build
 
 cp ./build/mc ./bin/mc-llvm
+
