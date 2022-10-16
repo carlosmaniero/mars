@@ -4,6 +4,11 @@ extern "C" {
     int entry();
 }
 
+extern "C" int printint(int x) {
+  fprintf(stderr, "%d\n", x);
+  return 0;
+}
+
 int main() {
-    std::cout << "the entry function returned: " << entry() << std::endl;
+    entry();
 }

@@ -30,13 +30,22 @@
 #endif
 #include <string>
 
-
 void mcllvm::LLVMContext::evalNamespace(mcparser::NamespaceASTNode* namespaceAST) {
     spdlog::info("LLVM evaluating namespace: " + namespaceAST->identifier);
 
     llvmContext = std::make_unique<llvm::LLVMContext>();
     llvmModule = std::make_unique<llvm::Module>(namespaceAST->identifier, *llvmContext);
     llvmBuilder = std::make_unique<llvm::IRBuilder<>>(*llvmContext);
+
+    auto llvmFunction = this->llvmModule->getFunction("printint");
+    if (!llvmFunction) {
+        auto functionAst = mcparser::FunctionStatementASTNode();
+        functionAst.identifier = "printint";
+        functionAst.parameters = std::make_shared<mcparser::Parameters>();
+        functionAst.parameters->push_back(std::make_shared<mcparser::Parameter>());
+        functionAst.parameters->at(0)->identifier = std::make_shared<std::string>("x");
+        this->evalPrototype(&functionAst);
+    }
 
     for (auto &node : namespaceAST->nodes) {
         node->eval(this);
@@ -91,18 +100,18 @@ void mcllvm::LLVMContext::evalNamespace(mcparser::NamespaceASTNode* namespaceAST
     dest.flush();
 }
 
-void mcllvm::LLVMContext::evalFunction(mcparser::FunctionStatementASTNode* functionAst) {
+void mcllvm::LLVMContext::evalPrototype(mcparser::FunctionStatementASTNode* functionAst) {
     spdlog::info("LLVM evaluating function: " + functionAst->identifier);
     std::vector<llvm::Type*> parameters(functionAst->parameters->size());
 
     spdlog::info("LLVM Creating parameters");
     for (int i = 0; i < functionAst->parameters->size(); i++) {
-        parameters.at(i) = llvm::Type::getInt64Ty(*llvmContext);
+        parameters.at(i) = llvm::Type::getInt32Ty(*llvmContext);
     }
 
     // TODO(carlosmaniero): Hard coded int
     spdlog::info("LLVM Defining return type");
-    llvm::Type* returnType = llvm::Type::getInt64Ty(*llvmContext);
+    llvm::Type* returnType = llvm::Type::getInt32Ty(*llvmContext);
 
     llvm::FunctionType* functionType = llvm::FunctionType::get(returnType, parameters, false);
 
@@ -117,6 +126,11 @@ void mcllvm::LLVMContext::evalFunction(mcparser::FunctionStatementASTNode* funct
         spdlog::error("LLVM could not create a function");
         return;
     }
+}
+
+void mcllvm::LLVMContext::evalFunction(mcparser::FunctionStatementASTNode* functionAst) {
+    this->evalPrototype(functionAst);
+    auto function = this->llvmModule->getFunction(functionAst->identifier);
 
     spdlog::info("LLVM naming parameters");
     unsigned Idx = 0;
@@ -136,7 +150,7 @@ void mcllvm::LLVMContext::evalFunction(mcparser::FunctionStatementASTNode* funct
 
         // Create an alloca for this variable.
         llvm::AllocaInst* parameterAllocation = tempBuilder.CreateAlloca(
-            llvm::Type::getInt64Ty(*llvmContext), nullptr, arg.getName());
+            llvm::Type::getInt32Ty(*llvmContext), nullptr, arg.getName());
 
         // Store the initial value into the alloca.
         llvmBuilder->CreateStore(&arg, parameterAllocation);
@@ -172,6 +186,23 @@ void mcllvm::LLVMContext::evalUserDefinedFunctionCall(mcparser::UserDefinedFunct
 void mcllvm::LLVMContext::evalNativeFunctionCall(mcparser::NativeFunctionCall* functionAst) {
     spdlog::info("LLVM evaluating native function call of: " + *functionAst->functionName);
 
+    if ("printint" == *functionAst->functionName) {
+        auto llvmFunction = this->llvmModule->getFunction("printint");
+
+        if (llvmFunction == nullptr) {
+            spdlog::error("LLVM could not find printint function");
+            return;
+        }
+
+        this->evalValueFrom(functionAst->arguments->at(0)->value.get());
+        llvm::Value* first = this->latestEvaluatedValue;
+        std::vector<llvm::Value*> llvmFunctionArguments;
+        llvmFunctionArguments.push_back(first);
+
+        this->latestEvaluatedValue = llvmBuilder->CreateCall(llvmFunction, llvmFunctionArguments);
+        return;
+    }
+
     if ("+" != *functionAst->functionName) {
         spdlog::error("Native function not supported: " + *functionAst->functionName);
         return;
@@ -204,12 +235,12 @@ void mcllvm::LLVMContext::evalReferenceIdentifier(mcparser::ReferenceIdentifier*
     auto myReference = scopeValues.at(*reference->identifier);
 
     this->latestEvaluatedValue = llvmBuilder->CreateLoad(
-        llvm::Type::getInt64Ty(*llvmContext), myReference, *reference->identifier);
+        llvm::Type::getInt32Ty(*llvmContext), myReference, *reference->identifier);
 }
 
 void mcllvm::LLVMContext::evalInteger(mcparser::IntegerASTNode* integer) {
     spdlog::info("LLVM evaluating constant integer: " + std::to_string(integer->value));
-    llvm::Type *i64_type = llvm::IntegerType::getInt64Ty(*llvmContext);
+    llvm::Type *i32_type = llvm::IntegerType::getInt32Ty(*llvmContext);
 
-    this->latestEvaluatedValue = llvm::ConstantInt::get(i64_type, integer->value, true);
+    this->latestEvaluatedValue = llvm::ConstantInt::get(i32_type, integer->value, true);
 }

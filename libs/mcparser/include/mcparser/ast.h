@@ -11,7 +11,8 @@
 
 namespace mcparser {
 
-static std::set<std::string> NATIVE_FUNCTION_CALL_NAMES = {"+", "-", "*", "/"};
+static std::set<std::string> NATIVE_FUNCTION_CALL_NAMES = {
+  "+", "-", "*", "/", "printint"};
 
 class IParserContext;
 

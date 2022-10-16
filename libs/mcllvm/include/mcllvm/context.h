@@ -32,6 +32,7 @@ class LLVMContext : public mcparser::IParserContext {
     virtual void evalInteger(mcparser::IntegerASTNode* integer);
  private:
     llvm::Value* latestEvaluatedValue = NULL;
+    void evalPrototype(mcparser::FunctionStatementASTNode* functionAst);
     void evalValueFrom(mcparser::ASTNode* node);
 };
 }  // namespace mcllvm

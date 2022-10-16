@@ -4,4 +4,4 @@
   (fun public inc (Integer a) Integer
     (add a 1))
   (fun public entry () Integer
-    (inc 12)))
+    (printint (inc 12))))
