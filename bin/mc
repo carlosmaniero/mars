@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+BASEDIR=$(dirname "$0");
+PROJECT_DIR=$(dirname $BASEDIR)
+EXTERN_DIR="$PROJECT_DIR/extern"
+MCLLVM_PATH="$BASEDIR/mc-llvm";
+
+echo "mc-llvm path: $MCLLVM_PATH";
+
+$MCLLVM_PATH $1
+clang++ "$EXTERN_DIR/main.cpp" "$EXTERN_DIR/io.cpp" ./output.o -o $2
