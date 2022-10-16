@@ -17,13 +17,7 @@ logStep () {
 }
 
 if [ "$1" != "--skip-build" ]; then
-    logStep "Generating build files..."
-    cmake -S . -B build
-    # For debug build:
-    # cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-
-    logStep "Building..."
-    cmake --build build
+    sh build.sh
 fi
 
 source ./build/venv/bin/activate

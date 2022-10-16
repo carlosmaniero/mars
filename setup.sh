@@ -16,7 +16,7 @@ logStep () {
     printLine
 }
 
-./build.sh
+sh ./build.sh
 
 python3 -m venv build/venv
 source build/venv/bin/activate
