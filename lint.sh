@@ -18,5 +18,4 @@ logStep () {
 
 logStep "Linting Libs"
 
-source build/venv/bin/activate
 cpplint --recursive libs
