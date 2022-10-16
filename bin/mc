@@ -9,3 +9,5 @@ echo "mc-llvm path: $MCLLVM_PATH";
 
 $MCLLVM_PATH $1
 clang++ "$EXTERN_DIR/main.cpp" "$EXTERN_DIR/io.cpp" ./output.o -o $2
+
+rm ./output.o

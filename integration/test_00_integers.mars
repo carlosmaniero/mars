@@ -1,0 +1,7 @@
+(namespace test-00-integers
+  (fun public add (Integer a Integer b) Integer
+    (+ a b))
+  (fun public inc (Integer a) Integer
+    (add a 1))
+  (fun public entry () Integer
+    (printint (inc 12))))
